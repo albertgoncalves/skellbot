@@ -7,7 +7,7 @@ import Control.Monad (forever, unless, void)
 import Data.Text (Text, pack)
 import Network.WebSockets (ClientApp, receiveData, sendClose)
 import System.Environment (getEnv)
-import Wuss
+import Wuss (runSecureClient)
 
 printText :: Text -> IO ()
 printText = print
