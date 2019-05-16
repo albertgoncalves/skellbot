@@ -1,0 +1,7 @@
+*
+!.gitignore
+!shell.nix
+!README.md
+!hs/
+!*.hs
+!main

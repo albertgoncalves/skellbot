@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+set -e
+
+ghc hs/Client.hs -o hs/Client
+curl "https://slack.com/api/rtm.connect?token=$SLACK_BOT_TOKEN" > response.json
+export URL=$(
+    echo $(jq -r '.url' response.json) \
+        | sed 's/wss:\/\/cerberus-xxxx.lb.slack-msgs.com//g'
+)
+./hs/Client
