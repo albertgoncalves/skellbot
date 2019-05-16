@@ -23,6 +23,7 @@ ws connection =
     >> sendClose connection (pack "Bye!")
 
 main :: IO ()
-main = getEnv "URL" >>= (\url -> runSecureClient hostName 443 url ws)
-  where
-    hostName = "wss://cerberus-xxxx.lb.slack-msgs.com"
+main =
+    getEnv "RTMHOST"
+    >>= (\host -> getEnv "RTMPATH"
+    >>= (\path -> runSecureClient host 443 path ws))
