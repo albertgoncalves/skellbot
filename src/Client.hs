@@ -9,17 +9,20 @@ import Network.WebSockets (ClientApp, receiveData, sendClose)
 import System.Environment (getEnv)
 import Wuss
 
-main :: IO ()
-main = do
-    url <- getEnv "URL"
-    runSecureClient "wss://cerberus-xxxx.lb.slack-msgs.com" 443 url ws
+printText :: Text -> IO ()
+printText = print
+
+loop :: IO ()
+loop = getLine >>= (\line -> unless (null line) loop)
 
 ws :: ClientApp ()
-ws connection = do
+ws connection =
     putStrLn "Connected!"
-    void . forkIO . forever $ do
-        message <- receiveData connection
-        print (message :: Text)
-    let loop = getLine >>= (\line -> unless (null line) loop)
-    loop
-    sendClose connection (pack "Bye!")
+    >> (void . forkIO . forever) (receiveData connection >>= printText)
+    >> loop
+    >> sendClose connection (pack "Bye!")
+
+main :: IO ()
+main = getEnv "URL" >>= f
+  where
+    f url = runSecureClient "wss://cerberus-xxxx.lb.slack-msgs.com" 443 url ws
