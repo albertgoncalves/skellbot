@@ -2,10 +2,10 @@
 
 set -e
 
-ghc hs/Client.hs -o hs/Client
+ghc src/Client.hs -o src/Client
 curl "https://slack.com/api/rtm.connect?token=$SLACK_BOT_TOKEN" > response.json
 export URL=$(
     echo $(jq -r '.url' response.json) \
         | sed 's/wss:\/\/cerberus-xxxx.lb.slack-msgs.com//g'
 )
-./hs/Client
+./src/Client

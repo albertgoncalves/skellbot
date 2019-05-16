@@ -3,6 +3,6 @@
 !.shellhook
 !shell.nix
 !README.md
-!hs/
+!src/
 !*.hs
 !main
