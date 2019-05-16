@@ -1,5 +1,6 @@
 *
 !.gitignore
+!.shellhook
 !shell.nix
 !README.md
 !hs/

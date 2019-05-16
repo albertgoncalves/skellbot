@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+
+if [ $(uname -s) = "Darwin" ]; then
+    alias ls='ls --color=auto'
+    alias ll='ls -l'
+fi
