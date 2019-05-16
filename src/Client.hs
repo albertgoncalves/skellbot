@@ -23,6 +23,6 @@ ws connection =
     >> sendClose connection (pack "Bye!")
 
 main :: IO ()
-main = getEnv "URL" >>= f
+main = getEnv "URL" >>= (\url -> runSecureClient hostName 443 url ws)
   where
-    f url = runSecureClient "wss://cerberus-xxxx.lb.slack-msgs.com" 443 url ws
+    hostName = "wss://cerberus-xxxx.lb.slack-msgs.com"
