@@ -2,6 +2,7 @@
 
 module Main where
 
+import Chat (extract, returnMessage)
 import Control.Concurrent (forkIO)
 import Control.Monad (forever, unless, void)
 import Data.Text (Text, pack, unpack)
@@ -10,14 +11,13 @@ import Network.WebSockets (ClientApp, Connection, receiveData, sendClose,
 import System.Environment (getEnv)
 import Text.Printf (printf)
 import Wuss (runSecureClient)
-import Chat (extract, respond)
 
-chat :: Connection -> Text -> IO ()
-chat connection x =
+echo :: Connection -> Text -> IO ()
+echo connection x =
     maybe
         (return ())
         (sendTextData connection)
-        (pack . respond <$> (extract . unpack) x)
+        (pack . returnMessage <$> (extract . unpack) x)
     >> (putStrLn . printf " -> %s\n" . unpack) x
 
 loop :: Connection -> IO ()
@@ -28,7 +28,7 @@ loop connection = getLine >>= f >> loop connection
 app :: ClientApp ()
 app connection =
     putStrLn "Connected!"
-    >> (void . forkIO . forever) (receiveData connection >>= chat connection)
+    >> (void . forkIO . forever) (receiveData connection >>= echo connection)
     >> loop connection
     >> sendClose connection (pack "Bye!")
 
