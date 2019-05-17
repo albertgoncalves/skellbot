@@ -25,8 +25,8 @@ loop connection = getLine >>= f >> loop connection
   where
     f line = unless (null line) $ sendTextData connection (pack line)
 
-ws :: ClientApp ()
-ws connection =
+app :: ClientApp ()
+app connection =
     putStrLn "Connected!"
     >> (void . forkIO . forever) (receiveData connection >>= chat connection)
     >> loop connection
@@ -36,4 +36,4 @@ main :: IO ()
 main =
     getEnv "RTMHOST"
     >>= (\host -> getEnv "RTMPATH"
-    >>= (\path -> runSecureClient host 443 path ws))
+    >>= (\path -> runSecureClient host 443 path app))
