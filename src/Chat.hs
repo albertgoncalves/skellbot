@@ -3,7 +3,7 @@
 module Chat where
 
 import Text.Printf (printf)
-import Text.Regex (matchRegex, mkRegex, Regex)
+import Text.Regex (Regex, matchRegex, mkRegex)
 
 data Message =
     Message
@@ -11,16 +11,11 @@ data Message =
         , text :: String
         , user :: String
         , channel :: String
-        } deriving (Show)
+        }
+    deriving (Show)
 
 toMessage :: String -> String -> String -> String -> Message
-toMessage a b c d =
-    Message
-        { messageId = a
-        , text = b
-        , user = c
-        , channel = d
-        }
+toMessage a b c d = Message {messageId = a, text = b, user = c, channel = d}
 
 re :: Regex
 re =
