@@ -5,9 +5,11 @@ with pkgs; mkShell {
         (haskell.packages.ghc865.ghcWithPackages (pkgs: [
             pkgs.hlint
             pkgs.hoogle
+            pkgs.regex-compat
             pkgs.wuss
         ]))
         jq
+        rlwrap
     ];
     shellHook = ''
         . .env

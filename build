@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+
+ghc src/Chat.hs src/Client.hs -o src/Client
