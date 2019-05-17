@@ -8,7 +8,7 @@ extract() {
     echo $1 | sed $a$2$b
 }
 
-ghc src/Chat.hs src/Client.hs -o src/Client
+./build
 response=$(
     curl "https://slack.com/api/rtm.connect?token=$SLACK_BOT_TOKEN" \
         | jq -r '.url'
