@@ -11,3 +11,8 @@ inject =
         \,\"type\":\"message\"\
         \,\"channel\":\"%s\"\
         \,\"text\":\"%s\"}"
+
+options :: String
+options =
+    "!hello\n\
+    \!echo ..."
