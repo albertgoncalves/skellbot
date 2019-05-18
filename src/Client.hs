@@ -29,12 +29,12 @@ loop connection = getLine >>= (\line -> unless (null line) (loop connection))
 
 app :: String -> ClientApp ()
 app botId connection =
-    putStrLn "\nSlackApi> It begins." >>
+    putStrLn "\nSlackApi> ... the bursting-forth of the blossom ..." >>
     (forkIO . forever)
         (receiveData connection >>= maybeRespond connection botId 1) >>
     loop connection >>
     sendClose connection (pack "Bye!") >>
-    putStrLn "SlackApi> And yet, it ends."
+    putStrLn "SlackApi> Tread softly because you tread on my dreams."
 
 run :: String -> String -> String -> IO ()
 run host path botId = runSecureClient host 443 path (app botId)

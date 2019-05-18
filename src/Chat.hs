@@ -14,5 +14,6 @@ inject =
 
 options :: String
 options =
-    "!hello\n\
-    \!echo ..."
+    "`!hello`\\n\
+    \`!echo ...`\\n\
+    \`!help`"
