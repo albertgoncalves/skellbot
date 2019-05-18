@@ -21,9 +21,6 @@ extract x =
             \.*\"user\":\"([^\"]*)\"\
             \.*\"channel\":\"([^\"]*)\".*"
 
-split :: String -> [[String]]
-split = map (validate . unpack) . splitOn (pack "|") . pack
-
 validate :: String -> [String]
 validate x =
     case words x of
@@ -31,6 +28,13 @@ validate x =
         (y:ys) -> f y ++ ys
   where
     f = concat . matchRegex (mkRegex "!([a-z]+)")
+
+tokenize :: String -> [[String]]
+tokenize = f . map (validate . unpack) . splitOn (pack "|") . pack
+  where
+    f xs
+        | [] `elem` xs = []
+        | otherwise = xs
 
 inject :: Int -> String -> String -> String
 inject =
@@ -44,23 +48,30 @@ options :: String
 options =
     "`!hello`\\n\
     \`!echo ...`\\n\
+    \`!rev ...`\\n\
+    \`!upper ...`\\n\
+    \`!lower ...`\\n\
     \`!help`"
 
-switch :: String -> [String] -> String
-switch _ ["hello"] = "Hello!"
-switch _ ["help"] = options
-switch _ ("echo":xs) = unwords xs
-switch x ["rev"] = reverse x
-switch _ ("rev":xs) = (reverse . unwords) xs
-switch x ["upper"] = map toUpper x
-switch _ ("upper":xs) = (map toUpper . unwords) xs
-switch x ["lower"] = map toLower x
-switch _ ("lower":xs) = (map toLower . unwords) xs
-switch x _ = x
+select :: String -> String -> String
+select "hello" = const "Hello!"
+select "echo" = id
+select "rev" = reverse
+select "upper" = map toUpper
+select "lower" = map toLower
+select "help" = const options
+select _ = const mempty
+
+control :: String -> [String] -> String
+control x [command] = select command x
+control _ (command:args) = (select command . unwords) args
+control x [] = x
 
 relay :: String -> Int -> Message -> Maybe String
 relay botId i m
     | botId == user m = Nothing
-    | otherwise = (f . foldl switch mempty . split . text) m
+    | otherwise = (f . foldl control mempty . tokenize . text) m
   where
-    f = Just . inject i (channel m)
+    f x
+        | null x = Nothing
+        | otherwise = Just $ inject i (channel m) x
