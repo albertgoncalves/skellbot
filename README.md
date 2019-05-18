@@ -14,5 +14,6 @@ Quick start
 ---
 ```
 $ nix-shell
+[nix-shell:path/to/skellbot]$ ./test
 [nix-shell:path/to/skellbot]$ ./main
 ```
