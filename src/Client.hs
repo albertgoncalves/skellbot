@@ -22,7 +22,7 @@ echo connection x =
     maybe
         (return ())
         (sendTextData connection)
-        (pack . returnMessage <$> (extract . unpack) x) >>
+        (pack <$> (returnMessage "UGU2ML1JL" =<< (extract . unpack) x)) >>
     (putStrLn . printf " -> %s\n" . unpack) x
 
 loop :: Connection -> IO ()

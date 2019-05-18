@@ -35,8 +35,10 @@ example :: String
 example =
     "{\"client_msg_id\":\"09ce85c3-b339-4ca0-803a-86b7c89743c7\",\"suppress_notification\":false,\"type\":\"message\",\"text\":\"hello\",\"user\":\"UFZ4K692M\",\"team\":\"TFX228M0Q\",\"channel\":\"DGYRV6E5S\",\"event_ts\":\"1558057277.002000\",\"ts\":\"1558057277.002000\"}"
 
-returnMessage :: Message -> String
-returnMessage m = printf x i c t
+returnMessage :: String -> Message -> Maybe String
+returnMessage u m
+    | user m == u = Nothing
+    | otherwise = Just $ printf x i c t
   where
     x =
         "{\"id\": %d\
@@ -48,4 +50,4 @@ returnMessage m = printf x i c t
     i = 1 :: Int
 
 main :: IO ()
-main = maybe (return ()) print (returnMessage <$> extract example)
+main = maybe (return ()) print (returnMessage "UGU2ML1JL" =<< extract example)
