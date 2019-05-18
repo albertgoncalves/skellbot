@@ -16,12 +16,12 @@ data Message =
 
 extract :: String -> Maybe Message
 extract x =
-    case concat (matchRegex p x) of
-        [a, b, c, d] ->
-            Just Message {messageId = a, text = b, user = c, channel = d}
+    case concat (matchRegex regex x) of
+        [m, t, u, c] ->
+            Just Message {messageId = m, text = t, user = u, channel = c}
         _ -> Nothing
   where
-    p =
+    regex =
         mkRegex
             ".*\"client_msg_id\":\"([^\"]*)\
             \.*\"text\":\"([^\"]*)\"\
@@ -32,14 +32,15 @@ validate :: String -> [String]
 validate = concat . matchRegex (mkRegex "!bot (.+)")
 
 relay :: String -> Int -> Message -> Maybe String
-relay u i m
-    | u == user m = Nothing
+relay botId i message
+    | botId == user message = Nothing
     | otherwise =
-        case validate (text m) of
-            [x] -> Just $ printf s i (channel m) x
+        case validate (text message) of
+            [x] -> Just $ printf returnString i (channel message) x
             _ -> Nothing
   where
-    s = "{\"id\":%d,\"type\":\"message\",\"channel\":\"%s\",\"text\":\"%s\"}"
+    returnString =
+        "{\"id\":%d,\"type\":\"message\",\"channel\":\"%s\",\"text\":\"%s\"}"
 
 example :: String
 example =
