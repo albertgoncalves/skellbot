@@ -6,11 +6,11 @@ import Bridge (extract, relay, validate)
 import Chat (inject, options)
 import Test.HUnit (Counts, Test(TestCase, TestList), assertEqual, runTestTT)
 import Test.HUnit.Lang (Assertion)
-import Types (Message(Message, channel, messageId, text, user), message)
+import Types (message)
 
 testValidate :: [Assertion]
 testValidate =
-    [ assertEqual "assertEqual validate !hello" (validate "!hello ") ["hello"]
+    [ assertEqual "assertEqual validate !hello" (validate "!hello") ["hello"]
     , assertEqual
           "assertEqual validate !foo ..."
           (validate "!foo bar baz")
@@ -34,7 +34,7 @@ testExtract =
 testRelay :: [Assertion]
 testRelay =
     [ assertEqual
-          "assertEqual relay <feedback loop>"
+          "assertEqual relay <no feedback loop>"
           (relay "A" 1 $ message "1" "!hello" "A" "channel")
           Nothing
     , assertEqual
