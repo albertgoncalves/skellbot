@@ -2,7 +2,7 @@
 
 module Bridge where
 
-import Chat (echo)
+import Chat (inject)
 import Text.Regex (matchRegex, mkRegex)
 import Types (Message(Message, channel, messageId, text, user))
 
@@ -21,12 +21,18 @@ extract x =
             \.*\"channel\":\"([^\"]*)\".*"
 
 validate :: String -> [String]
-validate = concat . matchRegex (mkRegex "!bot (.+)")
+validate x = f y ++ ys
+  where
+    f = concat . matchRegex (mkRegex "!([a-z]+)")
+    y:ys = words x
 
 relay :: String -> Int -> Message -> Maybe String
 relay botId i message
     | botId == user message = Nothing
     | otherwise =
         case validate (text message) of
-            [x] -> Just $ echo i (channel message) x
+            ("hello":_) -> f "Hello!"
+            ("echo":xs) -> (f . unwords) xs
             _ -> Nothing
+  where
+    f = Just . inject i (channel message)

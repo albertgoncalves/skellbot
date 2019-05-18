@@ -4,8 +4,8 @@ module Chat where
 
 import Text.Printf (printf)
 
-echo :: Int -> String -> String -> String
-echo =
+inject :: Int -> String -> String -> String
+inject =
     printf
         "{\"id\":%d\
         \,\"type\":\"message\"\
