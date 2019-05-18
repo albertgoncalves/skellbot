@@ -4,7 +4,7 @@ module Main where
 
 import Chat (extract, relay)
 import Control.Concurrent (forkIO)
-import Control.Monad (forever, unless, void)
+import Control.Monad (forever, unless)
 import Data.Text (Text, pack, unpack)
 import Network.WebSockets
     ( ClientApp
@@ -31,8 +31,7 @@ loop connection = getLine >>= (\line -> unless (null line) (loop connection))
 app :: String -> ClientApp ()
 app botId connection =
     putStrLn "\nSlackApi> It begins." >>
-    (void . forkIO . forever)
-        (receiveData connection >>= echo connection botId 1) >>
+    (forkIO . forever) (receiveData connection >>= echo connection botId 1) >>
     loop connection >>
     sendClose connection (pack "Bye!") >>
     putStrLn "SlackApi> And yet, it ends."
