@@ -41,18 +41,3 @@ relay botId i message
   where
     returnString =
         "{\"id\":%d,\"type\":\"message\",\"channel\":\"%s\",\"text\":\"%s\"}"
-
-example :: String
-example =
-    "{\"client_msg_id\":\"...\"\
-    \,\"suppress_notification\":false\
-    \,\"type\":\"message\"\
-    \,\"text\":\"!bot hello\"\
-    \,\"user\":\"...\"\
-    \,\"team\":\"...\"\
-    \,\"channel\":\"...\"\
-    \,\"event_ts\":\"...\"\
-    \,\"ts\":\"...\"}"
-
-main :: IO ()
-main = maybe (return ()) print (relay "" 1 =<< extract example)
