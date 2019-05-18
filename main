@@ -16,4 +16,4 @@ response=$(
 )
 export RTMHOST=${response%%/*}
 export RTMPATH=/${response#*/}
-rlwrap ./src/Client
+rlwrap ./bin/Skellbot

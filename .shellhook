@@ -5,4 +5,8 @@ if [ $(uname -s) = "Darwin" ]; then
     alias ll='ls -l'
 fi
 
+if [ ! -d bin/ ]; then
+    mkdir bin/
+fi
+
 alias hindent="hindent --indent-size 4 --sort-imports --line-length 78"

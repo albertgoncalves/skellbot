@@ -1,6 +1,6 @@
 {-# OPTIONS_GHC -Wall #-}
 
-module Chat where
+module Bridge where
 
 import Text.Printf (printf)
 import Text.Regex (matchRegex, mkRegex)

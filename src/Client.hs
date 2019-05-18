@@ -1,8 +1,8 @@
 {-# OPTIONS_GHC -Wall #-}
 
-module Main where
+module Client where
 
-import Chat (extract, relay)
+import Bridge (extract, relay)
 import Control.Concurrent (forkIO)
 import Control.Monad (forever, unless)
 import Data.Text (Text, pack, unpack)
@@ -13,12 +13,11 @@ import Network.WebSockets
     , sendClose
     , sendTextData
     )
-import System.Environment (getEnv)
 import Text.Printf (printf)
 import Wuss (runSecureClient)
 
-echo :: Connection -> String -> Int -> Text -> IO ()
-echo connection botId i input =
+maybeRespond :: Connection -> String -> Int -> Text -> IO ()
+maybeRespond connection botId i input =
     maybe
         (return ())
         (sendTextData connection)
@@ -31,14 +30,11 @@ loop connection = getLine >>= (\line -> unless (null line) (loop connection))
 app :: String -> ClientApp ()
 app botId connection =
     putStrLn "\nSlackApi> It begins." >>
-    (forkIO . forever) (receiveData connection >>= echo connection botId 1) >>
+    (forkIO . forever)
+        (receiveData connection >>= maybeRespond connection botId 1) >>
     loop connection >>
     sendClose connection (pack "Bye!") >>
     putStrLn "SlackApi> And yet, it ends."
 
-main :: IO ()
-main =
-    getEnv "RTMHOST" >>=
-    (\host -> getEnv "RTMPATH" >>= (\path -> getEnv "BOTID" >>= f host path))
-  where
-    f host path botId = runSecureClient host 443 path (app botId)
+run :: String -> String -> String -> IO ()
+run host path botId = runSecureClient host 443 path (app botId)
