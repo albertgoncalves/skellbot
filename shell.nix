@@ -6,6 +6,7 @@ with pkgs; mkShell {
             pkgs.hindent
             pkgs.hlint
             pkgs.hoogle
+            pkgs.HUnit
             pkgs.regex-compat
             pkgs.wuss
         ]))

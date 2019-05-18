@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+set -e
+
+find . -name "*.hs" -exec bash -c 'lint "$0"' {} \;
+ghc src/Bridge.hs src/test/Test.hs -o bin/Test
+./bin/Test

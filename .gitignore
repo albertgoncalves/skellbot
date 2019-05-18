@@ -4,6 +4,8 @@
 !shell.nix
 !README.md
 !src/
+!test/
 !*.hs
-!main
 !build
+!test
+!main

@@ -12,7 +12,7 @@ data Message =
         , user :: String
         , channel :: String
         }
-    deriving (Show)
+    deriving (Eq, Show)
 
 extract :: String -> Maybe Message
 extract x =
