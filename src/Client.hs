@@ -26,9 +26,7 @@ echo connection botId i input =
     (putStrLn . printf " -> %s\n" . unpack) input
 
 loop :: Connection -> IO ()
-loop connection = getLine >>= f >> loop connection
-  where
-    f line = unless (null line) $ sendTextData connection (pack line)
+loop connection = getLine >>= (\line -> unless (null line) (loop connection))
 
 app :: String -> ClientApp ()
 app botId connection =

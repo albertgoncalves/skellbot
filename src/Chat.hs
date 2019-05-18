@@ -29,7 +29,7 @@ extract x =
             \.*\"channel\":\"([^\"]*)\".*"
 
 validate :: String -> [String]
-validate = concat . matchRegex (mkRegex "!bot ([a-zA-Z0-9]+)")
+validate = concat . matchRegex (mkRegex "!bot (.+)")
 
 relay :: String -> Int -> Message -> Maybe String
 relay u i m
@@ -39,11 +39,7 @@ relay u i m
             [x] -> Just $ printf s i (channel m) x
             _ -> Nothing
   where
-    s =
-        "{\"id\": %d\
-        \, \"type\": \"message\"\
-        \, \"channel\": \"%s\"\
-        \, \"text\": \"%s\"}"
+    s = "{\"id\":%d,\"type\":\"message\",\"channel\":\"%s\",\"text\":\"%s\"}"
 
 example :: String
 example =
