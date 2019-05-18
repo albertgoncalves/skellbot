@@ -3,7 +3,7 @@
 module Chat where
 
 import Text.Printf (printf)
-import Text.Regex (Regex, matchRegex, mkRegex)
+import Text.Regex (matchRegex, mkRegex)
 
 data Message =
     Message
@@ -14,40 +14,48 @@ data Message =
         }
     deriving (Show)
 
-toMessage :: String -> String -> String -> String -> Message
-toMessage a b c d = Message {messageId = a, text = b, user = c, channel = d}
-
-re :: Regex
-re =
-    mkRegex
-        ".*\"client_msg_id\":\"([^\"]*)\
-        \.*\"text\":\"([^\"]*)\"\
-        \.*\"user\":\"([^\"]*)\"\
-        \.*\"channel\":\"([^\"]*)\".*"
-
 extract :: String -> Maybe Message
 extract x =
-    case matchRegex re x of
-        Just [a, b, c, d] -> Just $ toMessage a b c d
+    case concat (matchRegex p x) of
+        [a, b, c, d] ->
+            Just Message {messageId = a, text = b, user = c, channel = d}
         _ -> Nothing
-
-example :: String
-example =
-    "{\"client_msg_id\":\"09ce85c3-b339-4ca0-803a-86b7c89743c7\",\"suppress_notification\":false,\"type\":\"message\",\"text\":\"hello\",\"user\":\"UFZ4K692M\",\"team\":\"TFX228M0Q\",\"channel\":\"DGYRV6E5S\",\"event_ts\":\"1558057277.002000\",\"ts\":\"1558057277.002000\"}"
-
-returnMessage :: String -> Message -> Maybe String
-returnMessage u m
-    | user m == u = Nothing
-    | otherwise = Just $ printf x i c t
   where
-    x =
+    p =
+        mkRegex
+            ".*\"client_msg_id\":\"([^\"]*)\
+            \.*\"text\":\"([^\"]*)\"\
+            \.*\"user\":\"([^\"]*)\"\
+            \.*\"channel\":\"([^\"]*)\".*"
+
+validate :: String -> [String]
+validate = concat . matchRegex (mkRegex "!bot ([a-zA-Z0-9]+)")
+
+relay :: String -> Int -> Message -> Maybe String
+relay u i m
+    | u == user m = Nothing
+    | otherwise =
+        case validate (text m) of
+            [x] -> Just $ printf s i (channel m) x
+            _ -> Nothing
+  where
+    s =
         "{\"id\": %d\
         \, \"type\": \"message\"\
         \, \"channel\": \"%s\"\
         \, \"text\": \"%s\"}"
-    c = channel m
-    t = text m
-    i = 1 :: Int
+
+example :: String
+example =
+    "{\"client_msg_id\":\"...\"\
+    \,\"suppress_notification\":false\
+    \,\"type\":\"message\"\
+    \,\"text\":\"!bot hello\"\
+    \,\"user\":\"...\"\
+    \,\"team\":\"...\"\
+    \,\"channel\":\"...\"\
+    \,\"event_ts\":\"...\"\
+    \,\"ts\":\"...\"}"
 
 main :: IO ()
-main = maybe (return ()) print (returnMessage "UGU2ML1JL" =<< extract example)
+main = maybe (return ()) print (relay "" 1 =<< extract example)

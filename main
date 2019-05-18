@@ -2,11 +2,17 @@
 
 set -e
 
+api="https://slack.com/api"
+
 ./build
+export BOTID=$(
+    curl "$api/auth.test?token=$SLACK_BOT_TOKEN" \
+        | jq -r ".user_id"
+)
 response=$(
-    curl "https://slack.com/api/rtm.connect?token=$SLACK_BOT_TOKEN" \
-        | jq -r '.url' \
-        | sed 's|^wss://||'
+    curl "$api/rtm.connect?token=$SLACK_BOT_TOKEN" \
+        | jq -r ".url" \
+        | sed "s|^wss://||"
 )
 export RTMHOST=${response%%/*}
 export RTMPATH=/${response#*/}
