@@ -2,17 +2,12 @@
 
 set -e
 
-extract() {
-    a='s/wss:\/\/\(.*\.com\)\(.*\)/\'
-    b='/g'
-    echo $1 | sed $a$2$b
-}
-
 ./build
 response=$(
     curl "https://slack.com/api/rtm.connect?token=$SLACK_BOT_TOKEN" \
-        | jq -r '.url'
+        | jq -r '.url' \
+        | sed 's|^wss://||'
 )
-export RTMHOST=$(extract $response "1")
-export RTMPATH=$(extract $response "2")
+export RTMHOST=${response%%/*}
+export RTMPATH=/${response#*/}
 ./src/Client
