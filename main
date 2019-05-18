@@ -16,4 +16,4 @@ response=$(
 )
 export RTMHOST=${response%%/*}
 export RTMPATH=/${response#*/}
-./src/Client
+rlwrap ./src/Client
