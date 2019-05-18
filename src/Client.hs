@@ -2,7 +2,7 @@
 
 module Client where
 
-import Bridge (extract, relay)
+import Chat (extract, relay)
 import Control.Concurrent (forkIO)
 import Control.Monad (forever, unless)
 import Data.Text (Text, pack, unpack)

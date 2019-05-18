@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
 
 ghc \
-    src/Types.hs src/Chat.hs src/Bridge.hs src/Client.hs src/Main.hs \
+    src/Types.hs src/Chat.hs src/Client.hs src/Main.hs \
     -o bin/Main

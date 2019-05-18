@@ -2,8 +2,7 @@
 
 module Main where
 
-import Bridge (extract, relay, validate)
-import Chat (inject, options)
+import Chat (extract, inject, options, relay, validate)
 import Test.HUnit (Counts, Test(TestCase, TestList), assertEqual, runTestTT)
 import Test.HUnit.Lang (Assertion)
 import Types (message)
