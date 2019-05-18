@@ -23,18 +23,19 @@ echo connection botId i input =
         (return ())
         (sendTextData connection)
         (pack <$> (relay botId i =<< (extract . unpack) input)) >>
-    (putStrLn . printf " -> %s\n" . unpack) input
+    (putStrLn . printf "SlackApi> %s\n" . unpack) input
 
 loop :: Connection -> IO ()
 loop connection = getLine >>= (\line -> unless (null line) (loop connection))
 
 app :: String -> ClientApp ()
 app botId connection =
-    putStrLn "Connected!" >>
+    putStrLn "\nSlackApi> It begins." >>
     (void . forkIO . forever)
         (receiveData connection >>= echo connection botId 1) >>
     loop connection >>
-    sendClose connection (pack "Bye!")
+    sendClose connection (pack "Bye!") >>
+    putStrLn "SlackApi> And yet, it ends."
 
 main :: IO ()
 main =
