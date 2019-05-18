@@ -2,13 +2,10 @@
 
 module Main where
 
-import Bridge
-    ( Message(Message, channel, messageId, text, user)
-    , extract
-    , relay
-    )
+import Bridge (extract, relay)
 import Test.HUnit (Counts, Test(TestCase, TestList), assertEqual, runTestTT)
 import Test.HUnit.Lang (Assertion)
+import Types (Message(Message, channel, messageId, text, user))
 
 testExtract :: Assertion
 testExtract = assertEqual "assertEqual extract" (extract input) (Just output)

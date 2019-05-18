@@ -2,17 +2,9 @@
 
 module Bridge where
 
-import Text.Printf (printf)
+import Chat (echo)
 import Text.Regex (matchRegex, mkRegex)
-
-data Message =
-    Message
-        { messageId :: String
-        , text :: String
-        , user :: String
-        , channel :: String
-        }
-    deriving (Eq, Show)
+import Types (Message(Message, channel, messageId, text, user))
 
 extract :: String -> Maybe Message
 extract x =
@@ -36,8 +28,5 @@ relay botId i message
     | botId == user message = Nothing
     | otherwise =
         case validate (text message) of
-            [x] -> Just $ printf returnString i (channel message) x
+            [x] -> Just $ echo i (channel message) x
             _ -> Nothing
-  where
-    returnString =
-        "{\"id\":%d,\"type\":\"message\",\"channel\":\"%s\",\"text\":\"%s\"}"
