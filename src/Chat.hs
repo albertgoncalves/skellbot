@@ -91,13 +91,13 @@ control x [command] = select command x
 control _ (command:args) = (select command . unwords) args
 control x [] = x
 
-foldCommands :: String -> String
-foldCommands = foldl control "" . tokenize
+foldControl :: String -> String
+foldControl = foldl control "" . tokenize
 
 relay :: String -> Int -> Message -> Maybe String
 relay botId i m
     | botId == user m = Nothing
-    | otherwise = (f . foldCommands . text) m
+    | otherwise = (f . foldControl . text) m
   where
     f x
         | null x = Nothing

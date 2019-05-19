@@ -5,7 +5,7 @@ module Main where
 import Chat
     ( control
     , extract
-    , foldCommands
+    , foldControl
     , inject
     , options
     , relay
@@ -69,73 +69,77 @@ testControl =
           "Bernar has been *banned*."
     ]
 
-testFoldCommands :: [Assertion]
-testFoldCommands =
-    [ assertEqual "assertEqual foldCommands !HELLO" (foldCommands "!HELLO") ""
+testFoldControl :: [Assertion]
+testFoldControl =
+    [ assertEqual "assertEqual foldControl !HELLO" (foldControl "!HELLO") ""
     , assertEqual
-          "assertEqual foldCommands !hello | !upper"
-          (foldCommands "!hello | !upper")
+          "assertEqual foldControl !hello | !upper"
+          (foldControl "!hello | !upper")
           "HELLO!"
     , assertEqual
-          "assertEqual foldCommands !echo HELLO! | !lower | !rev"
-          (foldCommands "!echo HELLO! | !lower | !rev")
+          "assertEqual foldControl !echo HELLO! | !lower | !rev"
+          (foldControl "!echo HELLO! | !lower | !rev")
           "!olleh"
     , assertEqual
-          "assertEqual foldCommands !hello | !echo | !rev | !upper"
-          (foldCommands "!hello | !echo | !rev | !upper")
+          "assertEqual foldControl !hello | !echo | !rev | !upper"
+          (foldControl "!hello | !echo | !rev | !upper")
           "!OLLEH"
     , assertEqual
-          "assertEqual foldCommands !bernar"
-          (foldCommands "!bernar")
+          "assertEqual foldControl !bernar"
+          (foldControl "!bernar")
           ":stache:"
     , assertEqual
-          "assertEqual foldCommands !bernar | !rev"
-          (foldCommands "!bernar | !rev")
+          "assertEqual foldControl !bernar | !rev"
+          (foldControl "!bernar | !rev")
           ":stache:"
     , assertEqual
-          "assertEqual foldCommands !hello | rev"
-          (foldCommands "!hello | rev")
+          "assertEqual foldControl !hello | rev"
+          (foldControl "!hello | rev")
           ""
     , assertEqual
-          "assertEqual foldCommands !hello | !echo | !echo | !echo"
-          (foldCommands "!hello | !echo | !echo | !echo")
+          "assertEqual foldControl !hello | !echo | !echo | !echo"
+          (foldControl "!hello | !echo | !echo | !echo")
           "Hello!"
     , assertEqual
-          "assertEqual foldCommands !echo | !echo"
-          (foldCommands "!echo | !echo")
+          "assertEqual foldControl !echo | !echo"
+          (foldControl "!echo | !echo")
           ""
     , assertEqual
-          "assertEqual foldCommands !help | !upper | !rev"
-          (foldCommands "!help | !upper | !rev")
+          "assertEqual foldControl !help | !upper | !rev"
+          (foldControl "!help | !upper | !rev")
           options
     , assertEqual
-          "assertEqual foldCommands !hello | !bold | !em"
-          (foldCommands "!hello | !bold | !em")
+          "assertEqual foldControl !hello | !bold | !em"
+          (foldControl "!hello | !bold | !em")
           "_*Hello!*_"
     , assertEqual
-          "assertEqual foldCommands !echo foo bar baz | !bold | !em"
-          (foldCommands "!echo foo bar baz | !bold | !em")
+          "assertEqual foldControl !echo foo bar baz | !bold | !em"
+          (foldControl "!echo foo bar baz | !bold | !em")
           "_*foo bar baz*_"
     , assertEqual
-          "assertEqual foldCommands !echo {hello}"
-          (foldCommands "!echo {hello}")
+          "assertEqual foldControl !echo {hello}"
+          (foldControl "!echo {hello}")
           ""
     , assertEqual
-          "assertEqual foldCommands !echo \\n"
-          (foldCommands "!echo \\n")
+          "assertEqual foldControl !echo \\n"
+          (foldControl "!echo \\n")
           ""
     , assertEqual
-          "assertEqual foldCommands !echo foo bar baz!{} | !rev"
-          (foldCommands "!echo foo bar baz!{} | !rev")
+          "assertEqual foldControl !echo foo bar baz!{} | !rev"
+          (foldControl "!echo foo bar baz!{} | !rev")
           ""
     , assertEqual
-          "assertEqual foldCommands !hello {}!hello"
-          (foldCommands "!hello {}!hello")
+          "assertEqual foldControl !hello {}!hello"
+          (foldControl "!hello {}!hello")
           ""
     , assertEqual
-          "assertEqual foldCommands !hello | !rev | !ban | !em | !year"
-          (foldCommands "!hello | !rev | !ban | !em | !year")
+          "assertEqual foldControl !hello | !rev | !ban | !em | !year"
+          (foldControl "!hello | !rev | !ban | !em | !year")
           "_!olleH has been *banned*_ in 2019."
+    , assertEqual
+          "assertEqual foldControl !echo ban Bernar | !em | ! bold"
+          (foldControl "!echo ban Bernar! | !em | ! bold")
+          "*_ban Bernar!_*"
     ]
 
 testRelay :: [Assertion]
@@ -167,9 +171,15 @@ testRelay =
     ]
 
 main :: IO Counts
-main =
-    (runTestTT . TestList . map TestCase)
-        (testExtract :
-         testSanitize ++
-         testTokenize ++
-         testControl ++ testFoldCommands ++ testRelay ++ testValidate)
+main = (runTestTT . TestList . map TestCase) xs
+  where
+    xs =
+        testExtract :
+        concat
+            [ testSanitize
+            , testTokenize
+            , testControl
+            , testFoldControl
+            , testRelay
+            , testValidate
+            ]
