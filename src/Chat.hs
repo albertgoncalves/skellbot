@@ -77,6 +77,8 @@ select "upper" = careful (map toUpper)
 select "lower" = careful (map toLower)
 select "help" = const options
 select "ban" = printf "%s has been *banned*."
+select "bold" = printf "*%s*"
+select "em" = printf "_%s_"
 select _ = const ""
 
 control :: String -> [String] -> String

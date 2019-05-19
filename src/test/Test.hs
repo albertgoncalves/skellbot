@@ -106,6 +106,14 @@ testFoldCommands =
           (foldCommands "!help | !upper | !rev")
           options
     , assertEqual
+          "assertEqual foldCommands !hello | !bold | !em"
+          (foldCommands "!hello | !bold | !em")
+          "_*Hello!*_"
+    , assertEqual
+          "assertEqual foldCommands !echo foo bar baz | !bold | !em"
+          (foldCommands "!echo foo bar baz | !bold | !em")
+          "_*foo bar baz*_"
+    , assertEqual
           "assertEqual foldCommands !echo {hello}"
           (foldCommands "!echo {hello}")
           ""
