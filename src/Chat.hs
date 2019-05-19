@@ -4,7 +4,7 @@ module Chat where
 
 import Data.Char (isAlphaNum, toLower, toUpper)
 import Data.List (isInfixOf)
-import Data.Text (pack, splitOn, unpack)
+import Data.Text (pack, splitOn, strip, unpack)
 import Text.Printf (printf)
 import Text.Regex (matchRegex, mkRegex)
 import Types (Message(channel, text, user), message)
@@ -27,7 +27,7 @@ splitOnFirst x = fmap (drop 1) . break (x ==)
 
 sanitize :: String -> String
 sanitize xs
-    | all (\x -> isAlphaNum x || (x `elem` "! ")) xs = xs
+    | all (\x -> isAlphaNum x || (x `elem` "!,.*_ ")) xs = xs
     | otherwise = ""
 
 validate :: String -> [String]
@@ -36,10 +36,10 @@ validate x =
         ("", "") -> []
         (y, ys) -> f y ++ words ys
   where
-    f = concat . matchRegex (mkRegex "!([a-z]+)")
+    f = concat . matchRegex (mkRegex " *!([a-z]+)")
 
 tokenize :: String -> [[String]]
-tokenize = f . map (validate . unpack) . splitOn (pack "|") . pack
+tokenize = f . map (validate . unpack . strip) . splitOn (pack "|") . pack
   where
     f xs
         | [] `elem` xs = []
@@ -76,6 +76,7 @@ select "rev" = careful reverse
 select "upper" = careful (map toUpper)
 select "lower" = careful (map toLower)
 select "help" = const options
+select "ban" = printf "%s has been *banned*."
 select _ = const ""
 
 control :: String -> [String] -> String

@@ -2,19 +2,20 @@
 
 module Main where
 
-import Chat (control, extract, foldCommands, inject, options, relay, validate)
+import Chat
+    ( control
+    , extract
+    , foldCommands
+    , inject
+    , options
+    , relay
+    , sanitize
+    , tokenize
+    , validate
+    )
 import Test.HUnit (Counts, Test(TestCase, TestList), assertEqual, runTestTT)
 import Test.HUnit.Lang (Assertion)
 import Types (message)
-
-testValidate :: [Assertion]
-testValidate =
-    [ assertEqual "assertEqual validate !hello" (validate "!hello") ["hello"]
-    , assertEqual
-          "assertEqual validate !foo ..."
-          (validate "!foo bar baz")
-          ["foo", "bar", "baz"]
-    ]
 
 testExtract :: Assertion
 testExtract =
@@ -30,50 +31,79 @@ testExtract =
         \,\"user\":\"user\"\
         \,\"channel\":\"channel\"}"
 
+testValidate :: [Assertion]
+testValidate =
+    [ assertEqual "assertEqual validate !hello" (validate "!hello") ["hello"]
+    , assertEqual
+          "assertEqual validate !echo foo bar baz | !rev"
+          (validate "!echo foo bar baz")
+          ["echo", "foo", "bar", "baz"]
+    ]
+
+testSanitize :: [Assertion]
+testSanitize =
+    [assertEqual "assertEqual sanitize !hello" (sanitize "!hello") "!hello"]
+
+testTokenize :: [Assertion]
+testTokenize =
+    [ assertEqual
+          "tokenize !hello|!rev"
+          (tokenize "!hello|!rev")
+          [["hello"], ["rev"]]
+    , assertEqual
+          "tokenize !hello | !rev"
+          (tokenize "!hello | !rev")
+          [["hello"], ["rev"]]
+    ]
+
 testControl :: [Assertion]
 testControl =
     [ assertEqual "assertEqual control hello" (control "" ["hello"]) "Hello!"
     , assertEqual "assertEqual control HELLO" (control "" ["HELLO"]) ""
+    , assertEqual
+          "assertEqual control ban Bernar"
+          (control "" ["ban", "Bernar"])
+          "Bernar has been *banned*."
     ]
 
 testFoldCommands :: [Assertion]
 testFoldCommands =
     [ assertEqual "assertEqual foldCommands !HELLO" (foldCommands "!HELLO") ""
     , assertEqual
-          "assertEqual foldCommands !hello|!upper"
-          (foldCommands "!hello|!upper")
+          "assertEqual foldCommands !hello | !upper"
+          (foldCommands "!hello | !upper")
           "HELLO!"
     , assertEqual
-          "assertEqual foldCommands !echo HELLO!|!lower|!rev"
-          (foldCommands "!echo HELLO!|!lower|!rev")
+          "assertEqual foldCommands !echo HELLO! | !lower | !rev"
+          (foldCommands "!echo HELLO! | !lower | !rev")
           "!olleh"
     , assertEqual
-          "assertEqual foldCommands !hello|!echo|!rev|!upper"
-          (foldCommands "!hello|!echo|!rev|!upper")
+          "assertEqual foldCommands !hello | !echo | !rev | !upper"
+          (foldCommands "!hello | !echo | !rev | !upper")
           "!OLLEH"
     , assertEqual
           "assertEqual foldCommands !bernar"
           (foldCommands "!bernar")
           ":stache:"
     , assertEqual
-          "assertEqual foldCommands !bernar|!rev"
-          (foldCommands "!bernar|!rev")
+          "assertEqual foldCommands !bernar | !rev"
+          (foldCommands "!bernar | !rev")
           ":stache:"
     , assertEqual
-          "assertEqual foldCommands !hello|rev"
-          (foldCommands "!hello|rev")
+          "assertEqual foldCommands !hello | rev"
+          (foldCommands "!hello | rev")
           ""
     , assertEqual
-          "assertEqual foldCommands !hello|!echo|!echo|!echo"
-          (foldCommands "!hello|!echo|!echo|!echo")
+          "assertEqual foldCommands !hello | !echo | !echo | !echo"
+          (foldCommands "!hello | !echo | !echo | !echo")
           "Hello!"
     , assertEqual
-          "assertEqual foldCommands !echo|!echo"
-          (foldCommands "!echo|!echo")
+          "assertEqual foldCommands !echo | !echo"
+          (foldCommands "!echo | !echo")
           ""
     , assertEqual
-          "assertEqual foldCommands !help|!upper|!rev"
-          (foldCommands "!help|!upper|!rev")
+          "assertEqual foldCommands !help | !upper | !rev"
+          (foldCommands "!help | !upper | !rev")
           options
     , assertEqual
           "assertEqual foldCommands !echo {hello}"
@@ -84,8 +114,8 @@ testFoldCommands =
           (foldCommands "!echo \\n")
           ""
     , assertEqual
-          "assertEqual foldCommands !echo foo bar baz!{}|!rev"
-          (foldCommands "!echo foo bar baz!{}|!rev")
+          "assertEqual foldCommands !echo foo bar baz!{} | !rev"
+          (foldCommands "!echo foo bar baz!{} | !rev")
           ""
     , assertEqual
           "assertEqual foldCommands !hello {}!hello"
@@ -113,17 +143,18 @@ testRelay =
           (Just $ inject 1 "channel" options)
     , assertEqual
           "assertEqual relay <pipe>"
-          (relay "A" 1 $ message "1" "!echo foo|!rev|!upper" "B" "channel")
+          (relay "A" 1 $ message "1" "!echo foo | !rev | !upper" "B" "channel")
           (Just $ inject 1 "channel" "OOF")
     , assertEqual
           "assertEqual relay <pipe error>"
-          (relay "A" 1 $ message "1" "!echo foo||!upper" "B" "channel")
+          (relay "A" 1 $ message "1" "!echo foo | | !upper" "B" "channel")
           Nothing
     ]
 
 main :: IO Counts
-main = (runTestTT . TestList . map TestCase) xs
-  where
-    xs =
-        testExtract :
-        (testControl ++ testFoldCommands ++ testRelay ++ testValidate)
+main =
+    (runTestTT . TestList . map TestCase)
+        (testExtract :
+         testSanitize ++
+         testTokenize ++
+         testControl ++ testFoldCommands ++ testRelay ++ testValidate)
