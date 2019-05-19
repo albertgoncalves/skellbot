@@ -22,6 +22,9 @@ extract x =
             \.*\"user\":\"([^\"]*)\"\
             \.*\"channel\":\"([^\"]*)\".*"
 
+splitOnFirst :: Eq a => a -> [a] -> ([a], [a])
+splitOnFirst x = fmap (drop 1) . break (x ==)
+
 sanitize :: String -> String
 sanitize xs
     | all (\x -> isAlphaNum x || (x `elem` "! ")) xs = xs
@@ -29,11 +32,11 @@ sanitize xs
 
 validate :: String -> [String]
 validate x =
-    case words x of
-        [] -> []
-        (y:ys) -> f y ++ map sanitize ys
+    case (splitOnFirst ' ' . sanitize) x of
+        ("", "") -> []
+        (y, ys) -> f y ++ words ys
   where
-    f = concat . matchRegex (mkRegex "!([a-zA-Z]+)")
+    f = concat . matchRegex (mkRegex "!([a-z]+)")
 
 tokenize :: String -> [[String]]
 tokenize = f . map (validate . unpack) . splitOn (pack "|") . pack
@@ -76,8 +79,8 @@ select "help" = const options
 select _ = const ""
 
 control :: String -> [String] -> String
-control x [command] = select (map toLower command) x
-control _ (command:args) = (select (map toLower command) . unwords) args
+control x [command] = select command x
+control _ (command:args) = (select command . unwords) args
 control x [] = x
 
 foldCommands :: String -> String

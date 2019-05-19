@@ -33,7 +33,7 @@ testExtract =
 testControl :: [Assertion]
 testControl =
     [ assertEqual "assertEqual control hello" (control "" ["hello"]) "Hello!"
-    , assertEqual "assertEqual control HELLO" (control "" ["HELLO"]) "Hello!"
+    , assertEqual "assertEqual control HELLO" (control "" ["HELLO"]) ""
     ]
 
 testFoldCommands :: [Assertion]
@@ -42,10 +42,7 @@ testFoldCommands =
           "assertEqual foldCommands !hello|!upper"
           (foldCommands "!hello|!upper")
           "HELLO!"
-    , assertEqual
-          "assertEqual foldCommands !HELLO"
-          (foldCommands "!HELLO")
-          "Hello!"
+    , assertEqual "assertEqual foldCommands !HELLO" (foldCommands "!HELLO") ""
     , assertEqual
           "assertEqual foldCommands !echo HELLO!|!lower|!rev"
           (foldCommands "!echo HELLO!|!lower|!rev")
@@ -85,6 +82,14 @@ testFoldCommands =
     , assertEqual
           "assertEqual foldCommands !echo \\n"
           (foldCommands "!echo \\n")
+          ""
+    , assertEqual
+          "assertEqual foldCommands !echo foo bar baz!{}|!rev"
+          (foldCommands "!echo foo bar baz!{}|!rev")
+          ""
+    , assertEqual
+          "assertEqual foldCommands !hello {}!hello"
+          (foldCommands "!hello {}!hello")
           ""
     ]
 
