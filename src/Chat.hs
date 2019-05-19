@@ -57,6 +57,7 @@ options :: String
 options =
     "`!hello`\\n\
     \`!bernar`\\n\
+    \`!righton`\\n\
     \`!echo ...`\\n\
     \`!rev ...`\\n\
     \`!upper ...`\\n\
@@ -75,6 +76,7 @@ careful f x
 select :: String -> String -> String
 select "hello" = const "Hello!"
 select "bernar" = const ":stache:"
+select "righton" = const ":righton:x:100:"
 select "echo" = id
 select "rev" = careful reverse
 select "upper" = careful (map toUpper)

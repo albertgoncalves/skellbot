@@ -140,6 +140,10 @@ testFoldControl =
           "assertEqual foldControl !echo ban Bernar | !em | ! bold"
           (foldControl "!echo ban Bernar! | !em | ! bold")
           "*_ban Bernar!_*"
+    , assertEqual
+          "assertEqual foldControl !righton"
+          (foldControl "!righton")
+          ":righton:x:100:"
     ]
 
 testRelay :: [Assertion]
