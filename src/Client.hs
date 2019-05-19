@@ -4,7 +4,7 @@ module Client where
 
 import Chat (extract, relay)
 import Control.Concurrent (forkIO, threadDelay)
-import Control.Monad (forever, unless)
+import Control.Monad (forever, unless, void)
 import Data.Text (Text, pack, unpack)
 import Network.WebSockets
     ( ClientApp
@@ -24,9 +24,8 @@ maybeRespond :: Connection -> String -> Int -> Text -> IO ()
 maybeRespond connection botId i input =
     (putStrLn . printf "SlackApi> %s\n" . unpack) input >>
     case relay botId i <$> (extract . unpack) input of
-        Just (Websocket response) ->
-            sendTextData connection (pack response)
-        Just (POST _) -> wait 2 >> return () -- awaiting implementation!
+        Just (Websocket response) -> sendTextData connection (pack response)
+        Just (POST _) -> void (wait 2) -- awaiting implementation!
         _ -> return ()
 
 loop :: Connection -> IO ()
