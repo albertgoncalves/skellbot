@@ -42,7 +42,10 @@ testValidate =
 
 testSanitize :: [Assertion]
 testSanitize =
-    [assertEqual "assertEqual sanitize !hello" (sanitize "!hello") "!hello"]
+    [ assertEqual "assertEqual sanitize !hello" (sanitize "!hello") "!hello"
+    , assertEqual "assertEqual sanitize !hello {}" (sanitize "!hello {}") ""
+    , assertEqual "assertEqual sanitize !hello \"" (sanitize "!hello \"") ""
+    ]
 
 testTokenize :: [Assertion]
 testTokenize =
