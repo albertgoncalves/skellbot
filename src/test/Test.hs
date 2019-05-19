@@ -2,7 +2,7 @@
 
 module Main where
 
-import Chat (extract, inject, options, relay, validate)
+import Chat (control, extract, foldCommands, inject, options, relay, validate)
 import Test.HUnit (Counts, Test(TestCase, TestList), assertEqual, runTestTT)
 import Test.HUnit.Lang (Assertion)
 import Types (message)
@@ -30,41 +30,80 @@ testExtract =
         \,\"user\":\"user\"\
         \,\"channel\":\"channel\"}"
 
+testControl :: [Assertion]
+testControl =
+    [ assertEqual "assertEqual control hello" (control "" ["hello"]) "Hello!"
+    , assertEqual "assertEqual control HELLO" (control "" ["HELLO"]) "Hello!"
+    ]
+
+testFoldCommands :: [Assertion]
+testFoldCommands =
+    [ assertEqual
+          "assertEqual foldCommands !hello|!upper"
+          (foldCommands "!hello|!upper")
+          "HELLO!"
+    , assertEqual
+          "assertEqual foldCommands !HELLO"
+          (foldCommands "!HELLO")
+          "Hello!"
+    , assertEqual
+          "assertEqual foldCommands !echo HELLO!|!lower|!rev"
+          (foldCommands "!echo HELLO!|!lower|!rev")
+          "!olleh"
+    , assertEqual
+          "assertEqual foldCommands !hello|rev"
+          (foldCommands "!hello|rev")
+          ""
+    , assertEqual
+          "assertEqual foldCommands !hello|!echo|!echo|!echo"
+          (foldCommands "!hello|!echo|!echo|!echo")
+          "Hello!"
+    , assertEqual
+          "assertEqual foldCommands !echo|!echo"
+          (foldCommands "!echo|!echo")
+          ""
+    , assertEqual
+          "assertEqual foldCommands !help|!upper"
+          (foldCommands "!help|!upper")
+          "`!HELLO`\\N`\
+        \!ECHO ...`\\N`\
+        \!REV ...`\\N`\
+        \!UPPER ...`\\N`\
+        \!LOWER ...`\\N`\
+        \!HELP`"
+    ]
+
 testRelay :: [Assertion]
 testRelay =
-    [ f "assertEqual relay <no feedback loop>" "!hello" "A" "A" Nothing
-    , f "assertEqual relay <syntax error>" "blah" "A" "B" Nothing
-    , f "assertEqual relay <pipe error>" "!hello || !upper" "A" "B" Nothing
-    , f "assertEqual relay !hello" "!hello" "A" "B" (f' "Hello!")
-    , f "assertEqual relay !lower ..." "!lower FOO BAR" "A" "B" (f' "foo bar")
-    , f "assertEqual relay !help" "!help" "A" "B" (f' options)
-    , f "assertEqual relay !echo ..."
-          "!echo foo bar baz"
-          "A"
-          "B"
-          (f' "foo bar baz")
-    , f "assertEqual relay !echo ... | !rev"
-          "!echo foo bar baz | !rev"
-          "A"
-          "B"
-          (f' "zab rab oof")
-    , f "assertEqual relay !echo ... | !upper"
-          "!echo foo bar | !upper"
-          "A"
-          "B"
-          (f' "FOO BAR")
-    , f "assertEqual relay !echo ... | !echo"
-          "!echo foo bar | !echo"
-          "A"
-          "B"
-          (f' "foo bar")
+    [ assertEqual
+          "assertEqual relay <no feedback loop>"
+          (relay "A" 1 $ message "1" "!hello" "A" "channel")
+          Nothing
+    , assertEqual
+          "assertEqual relay !hello"
+          (relay "A" 1 $ message "1" "!hello" "B" "channel")
+          (Just $ inject 1 "channel" "Hello!")
+    , assertEqual
+          "assertEqual relay !echo ..."
+          (relay "A" 1 $ message "1" "!echo foo bar baz" "B" "channel")
+          (Just $ inject 1 "channel" "foo bar baz")
+    , assertEqual
+          "assertEqual relay !help"
+          (relay "A" 1 $ message "1" "!help" "B" "channel")
+          (Just $ inject 1 "channel" options)
+    , assertEqual
+          "assertEqual relay <pipe>"
+          (relay "A" 1 $ message "1" "!echo foo|!rev|!upper" "B" "channel")
+          (Just $ inject 1 "channel" "OOF")
+    , assertEqual
+          "assertEqual relay <pipe error>"
+          (relay "A" 1 $ message "1" "!echo foo||!upper" "B" "channel")
+          Nothing
     ]
-  where
-    f label text botId userId =
-        assertEqual label (relay botId 1 $ message "1" text userId "channel")
-    f' = Just . inject 1 "channel"
 
 main :: IO Counts
 main = (runTestTT . TestList . map TestCase) xs
   where
-    xs = testExtract : (testRelay ++ testValidate)
+    xs =
+        testExtract :
+        (testControl ++ testFoldCommands ++ testRelay ++ testValidate)

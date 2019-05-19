@@ -27,7 +27,7 @@ validate x =
         [] -> []
         (y:ys) -> f y ++ ys
   where
-    f = concat . matchRegex (mkRegex "!([a-z]+)")
+    f = concat . matchRegex (mkRegex "!([a-zA-Z]+)")
 
 tokenize :: String -> [[String]]
 tokenize = f . map (validate . unpack) . splitOn (pack "|") . pack
@@ -60,17 +60,20 @@ select "rev" = reverse
 select "upper" = map toUpper
 select "lower" = map toLower
 select "help" = const options
-select _ = const mempty
+select _ = const ""
 
 control :: String -> [String] -> String
-control x [command] = select command x
-control _ (command:args) = (select command . unwords) args
+control x [command] = select (map toLower command) x
+control _ (command:args) = (select (map toLower command) . unwords) args
 control x [] = x
+
+foldCommands :: String -> String
+foldCommands = foldl control "" . tokenize
 
 relay :: String -> Int -> Message -> Maybe String
 relay botId i m
     | botId == user m = Nothing
-    | otherwise = (f . foldl control mempty . tokenize . text) m
+    | otherwise = (f . foldCommands . text) m
   where
     f x
         | null x = Nothing
