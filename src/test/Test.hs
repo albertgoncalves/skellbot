@@ -38,11 +38,11 @@ testControl =
 
 testFoldCommands :: [Assertion]
 testFoldCommands =
-    [ assertEqual
+    [ assertEqual "assertEqual foldCommands !HELLO" (foldCommands "!HELLO") ""
+    , assertEqual
           "assertEqual foldCommands !hello|!upper"
           (foldCommands "!hello|!upper")
           "HELLO!"
-    , assertEqual "assertEqual foldCommands !HELLO" (foldCommands "!HELLO") ""
     , assertEqual
           "assertEqual foldCommands !echo HELLO!|!lower|!rev"
           (foldCommands "!echo HELLO!|!lower|!rev")
