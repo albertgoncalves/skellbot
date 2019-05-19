@@ -27,6 +27,7 @@ splitOnFirst x = fmap (drop 1) . break (x ==)
 
 sanitize :: String -> String
 sanitize xs
+    | "! " `isInfixOf` xs = ""
     | all (\x -> isAlphaNum x || (x `elem` "!,.*_ ")) xs = xs
     | otherwise = ""
 
@@ -36,7 +37,7 @@ validate x =
         ("", "") -> []
         (y, ys) -> f y ++ words ys
   where
-    f = concat . matchRegex (mkRegex " *!([a-z]+)")
+    f = concat . matchRegex (mkRegex " *!([a-z0-9]+)")
 
 tokenize :: String -> [[String]]
 tokenize = f . map (validate . unpack . strip) . splitOn (pack "|") . pack
@@ -63,7 +64,7 @@ options =
     \`!upper ...`\\n\
     \`!lower ...`\\n\
     \`!ban ...`\\n\
-    \`!year ...`\\n\
+    \`!2019 ...`\\n\
     \`!bold ...`\\n\
     \`!em ...`\\n\
     \`!help`"
@@ -82,7 +83,7 @@ select "rev" = careful reverse
 select "upper" = careful (map toUpper)
 select "lower" = careful (map toLower)
 select "ban" = printf "%s has been *banned*."
-select "year" = printf "%s in 2019." . filter (/= '.')
+select "2019" = printf "%s in 2019." . filter (/= '.')
 select "bold" = printf "*%s*" . filter (/= '*')
 select "em" = printf "_%s_" . filter (/= '_')
 select "help" = const options

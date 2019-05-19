@@ -133,17 +133,21 @@ testFoldControl =
           (foldControl "!hello {}!hello")
           ""
     , assertEqual
-          "assertEqual foldControl !hello | !rev | !ban | !em | !year"
-          (foldControl "!hello | !rev | !ban | !em | !year")
+          "assertEqual foldControl !hello | !rev | !ban | !em | !2019"
+          (foldControl "!hello | !rev | !ban | !em | !2019")
           "_!olleH has been *banned*_ in 2019."
     , assertEqual
-          "assertEqual foldControl !echo ban Bernar | !em | ! bold"
-          (foldControl "!echo ban Bernar! | !em | ! bold")
+          "assertEqual foldControl !echo ban Bernar | !em | !bold"
+          (foldControl "!echo ban Bernar! | !em | !bold")
           "*_ban Bernar!_*"
     , assertEqual
           "assertEqual foldControl !righton"
           (foldControl "!righton")
           ":righton:x:100:"
+    , assertEqual
+          "assertEqual foldControl !hello | !bold | ! !ban | !em | !2019"
+          (foldControl "!hello | !bold | ! !ban | !em | !2019")
+          ""
     ]
 
 testRelay :: [Assertion]
