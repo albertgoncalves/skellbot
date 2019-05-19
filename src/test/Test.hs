@@ -132,6 +132,10 @@ testFoldCommands =
           "assertEqual foldCommands !hello {}!hello"
           (foldCommands "!hello {}!hello")
           ""
+    , assertEqual
+          "assertEqual foldCommands !hello | !rev | !ban | !em | !year"
+          (foldCommands "!hello | !rev | !ban | !em | !year")
+          "_!olleH has been *banned*_ in 2019."
     ]
 
 testRelay :: [Assertion]

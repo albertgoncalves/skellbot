@@ -62,6 +62,7 @@ options =
     \`!upper ...`\\n\
     \`!lower ...`\\n\
     \`!ban ...`\\n\
+    \`!year ...`\\n\
     \`!bold ...`\\n\
     \`!em ...`\\n\
     \`!help`"
@@ -79,8 +80,9 @@ select "rev" = careful reverse
 select "upper" = careful (map toUpper)
 select "lower" = careful (map toLower)
 select "ban" = printf "%s has been *banned*."
-select "bold" = printf "*%s*"
-select "em" = printf "_%s_"
+select "year" = printf "%s in 2019." . filter (/= '.')
+select "bold" = printf "*%s*" . filter (/= '*')
+select "em" = printf "_%s_" . filter (/= '_')
 select "help" = const options
 select _ = const ""
 
