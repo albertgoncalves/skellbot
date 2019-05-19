@@ -14,7 +14,7 @@ import Network.WebSockets
     , sendTextData
     )
 import Text.Printf (printf)
-import Types (Response(POST, Websocket))
+import Types (Response(None, POST, Websocket))
 import Wuss (runSecureClient)
 
 wait :: Int -> IO ()
@@ -23,10 +23,10 @@ wait = threadDelay . (* 1000000)
 maybeRespond :: Connection -> String -> Int -> Text -> IO ()
 maybeRespond connection botId i input =
     (putStrLn . printf "SlackApi> %s\n" . unpack) input >>
-    case relay botId i <$> (extract . unpack) input of
-        Just (Websocket response) -> sendTextData connection (pack response)
-        Just (POST _) -> void (wait 2) -- awaiting implementation!
-        _ -> return ()
+    case maybe None (relay botId i) ((extract . unpack) input) of
+        Websocket response -> sendTextData connection (pack response)
+        POST _ -> void (wait 2) -- awaiting implementation!
+        None -> return ()
 
 loop :: Connection -> IO ()
 loop connection = getLine >>= (\line -> unless (null line) (loop connection))
