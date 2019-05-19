@@ -2,7 +2,7 @@
 
 module Chat where
 
-import Data.Char (toLower, toUpper)
+import Data.Char (isAlphaNum, toLower, toUpper)
 import Data.List (isInfixOf)
 import Data.Text (pack, splitOn, unpack)
 import Text.Printf (printf)
@@ -22,11 +22,16 @@ extract x =
             \.*\"user\":\"([^\"]*)\"\
             \.*\"channel\":\"([^\"]*)\".*"
 
+sanitize :: String -> String
+sanitize xs
+    | all (\x -> isAlphaNum x || (x `elem` "! ")) xs = xs
+    | otherwise = ""
+
 validate :: String -> [String]
 validate x =
     case words x of
         [] -> []
-        (y:ys) -> f y ++ ys
+        (y:ys) -> f y ++ map sanitize ys
   where
     f = concat . matchRegex (mkRegex "!([a-zA-Z]+)")
 
@@ -48,23 +53,25 @@ inject =
 options :: String
 options =
     "`!hello`\\n\
+    \`!bernar`\\n\
     \`!echo ...`\\n\
     \`!rev ...`\\n\
     \`!upper ...`\\n\
     \`!lower ...`\\n\
     \`!help`"
 
-safeNewline :: (String -> String) -> String -> String
-safeNewline f x
-    | "\\n" `isInfixOf` x = x
+careful :: (String -> String) -> String -> String
+careful f x
+    | any (`isInfixOf` x) [":", "\\n"] = x
     | otherwise = f x
 
 select :: String -> String -> String
 select "hello" = const "Hello!"
+select "bernar" = const ":stache:"
 select "echo" = id
-select "rev" = safeNewline reverse
-select "upper" = safeNewline (map toUpper)
-select "lower" = safeNewline (map toLower)
+select "rev" = careful reverse
+select "upper" = careful (map toUpper)
+select "lower" = careful (map toLower)
 select "help" = const options
 select _ = const ""
 
