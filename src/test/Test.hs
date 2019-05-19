@@ -63,14 +63,9 @@ testFoldCommands =
           (foldCommands "!echo|!echo")
           ""
     , assertEqual
-          "assertEqual foldCommands !help|!upper"
-          (foldCommands "!help|!upper")
-          "`!HELLO`\\N`\
-        \!ECHO ...`\\N`\
-        \!REV ...`\\N`\
-        \!UPPER ...`\\N`\
-        \!LOWER ...`\\N`\
-        \!HELP`"
+          "assertEqual foldCommands !help|!upper|!rev"
+          (foldCommands "!help|!upper|!rev")
+          options
     ]
 
 testRelay :: [Assertion]

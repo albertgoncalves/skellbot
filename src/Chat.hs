@@ -3,6 +3,7 @@
 module Chat where
 
 import Data.Char (toLower, toUpper)
+import Data.List (isInfixOf)
 import Data.Text (pack, splitOn, unpack)
 import Text.Printf (printf)
 import Text.Regex (matchRegex, mkRegex)
@@ -53,12 +54,17 @@ options =
     \`!lower ...`\\n\
     \`!help`"
 
+safeNewline :: (String -> String) -> String -> String
+safeNewline f x
+    | "\\n" `isInfixOf` x = x
+    | otherwise = f x
+
 select :: String -> String -> String
 select "hello" = const "Hello!"
 select "echo" = id
-select "rev" = reverse
-select "upper" = map toUpper
-select "lower" = map toLower
+select "rev" = safeNewline reverse
+select "upper" = safeNewline (map toUpper)
+select "lower" = safeNewline (map toLower)
 select "help" = const options
 select _ = const ""
 
