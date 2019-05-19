@@ -2,4 +2,5 @@
 
 ghc \
     src/Types.hs src/Chat.hs src/Client.hs src/Main.hs \
+    -O \
     -o bin/Main
