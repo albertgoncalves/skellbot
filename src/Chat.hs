@@ -61,6 +61,9 @@ options =
     \`!rev ...`\\n\
     \`!upper ...`\\n\
     \`!lower ...`\\n\
+    \`!ban ...`\\n\
+    \`!bold ...`\\n\
+    \`!em ...`\\n\
     \`!help`"
 
 careful :: (String -> String) -> String -> String
@@ -75,10 +78,10 @@ select "echo" = id
 select "rev" = careful reverse
 select "upper" = careful (map toUpper)
 select "lower" = careful (map toLower)
-select "help" = const options
 select "ban" = printf "%s has been *banned*."
 select "bold" = printf "*%s*"
 select "em" = printf "_%s_"
+select "help" = const options
 select _ = const ""
 
 control :: String -> [String] -> String
