@@ -7,7 +7,11 @@ import Data.List (isInfixOf)
 import Data.Text (pack, splitOn, strip, unpack)
 import Text.Printf (printf)
 import Text.Regex (matchRegex, mkRegex)
-import Types (Message(channel, text, user), message)
+import Types
+    ( Message(channel, text, user)
+    , Response(None, POST, Websocket)
+    , message
+    )
 
 extract :: String -> Maybe Message
 extract x =
@@ -69,9 +73,17 @@ options =
     \`!em ...`\\n\
     \`!help`"
 
-careful :: (String -> String) -> String -> String
-careful f x
+messageCapture :: (String -> String) -> String -> String
+messageCapture f x
     | any (`isInfixOf` x) [":", "\\n"] = x
+    | otherwise = f x
+
+curlCheck :: String -> Bool
+curlCheck = isInfixOf "[POST]"
+
+curlCapture :: (String -> String) -> String -> String
+curlCapture f x
+    | curlCheck x = x
     | otherwise = f x
 
 select :: String -> String -> String
@@ -79,29 +91,31 @@ select "hello" = const "Hello!"
 select "bernar" = const ":stache:"
 select "righton" = const ":righton:x:100:"
 select "echo" = id
-select "rev" = careful reverse
-select "upper" = careful (map toUpper)
-select "lower" = careful (map toLower)
+select "rev" = messageCapture reverse
+select "upper" = messageCapture (map toUpper)
+select "lower" = messageCapture (map toLower)
 select "ban" = printf "%s has been *banned*."
 select "2019" = printf "%s in 2019." . filter (/= '.')
 select "bold" = printf "*%s*" . filter (/= '*')
 select "em" = printf "_%s_" . filter (/= '_')
 select "help" = const options
+select "post" = const "[POST] ..."
 select _ = const ""
 
 control :: String -> [String] -> String
-control x [command] = select command x
-control _ (command:args) = (select command . unwords) args
+control x [command] = curlCapture (select command) x
+control _ (command:args) = (curlCapture (select command) . unwords) args
 control x [] = x
 
 foldControl :: String -> String
 foldControl = foldl control "" . tokenize
 
-relay :: String -> Int -> Message -> Maybe String
+relay :: String -> Int -> Message -> Response
 relay botId i m
-    | botId == user m = Nothing
+    | botId == user m = None
     | otherwise = (f . foldControl . text) m
   where
     f x
-        | null x = Nothing
-        | otherwise = Just $ inject i (channel m) x
+        | null x = None
+        | curlCheck x = POST x
+        | otherwise = Websocket $ inject i (channel m) x

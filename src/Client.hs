@@ -3,7 +3,7 @@
 module Client where
 
 import Chat (extract, relay)
-import Control.Concurrent (forkIO)
+import Control.Concurrent (forkIO, threadDelay)
 import Control.Monad (forever, unless)
 import Data.Text (Text, pack, unpack)
 import Network.WebSockets
@@ -14,15 +14,20 @@ import Network.WebSockets
     , sendTextData
     )
 import Text.Printf (printf)
+import Types (Response(POST, Websocket))
 import Wuss (runSecureClient)
+
+wait :: Int -> IO ()
+wait = threadDelay . (* 1000000)
 
 maybeRespond :: Connection -> String -> Int -> Text -> IO ()
 maybeRespond connection botId i input =
-    maybe
-        (return ())
-        (sendTextData connection)
-        (pack <$> (relay botId i =<< (extract . unpack) input)) >>
-    (putStrLn . printf "SlackApi> %s\n" . unpack) input
+    (putStrLn . printf "SlackApi> %s\n" . unpack) input >>
+    case relay botId i <$> (extract . unpack) input of
+        Just (Websocket response) ->
+            sendTextData connection (pack response)
+        Just (POST _) -> wait 2 >> return () -- awaiting implementation!
+        _ -> return ()
 
 loop :: Connection -> IO ()
 loop connection = getLine >>= (\line -> unless (null line) (loop connection))

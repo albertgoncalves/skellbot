@@ -15,7 +15,7 @@ import Chat
     )
 import Test.HUnit (Counts, Test(TestCase, TestList), assertEqual, runTestTT)
 import Test.HUnit.Lang (Assertion)
-import Types (message)
+import Types (Response(None, POST, Websocket), message)
 
 testExtract :: Assertion
 testExtract =
@@ -148,6 +148,14 @@ testFoldControl =
           "assertEqual foldControl !hello | !bold | ! !ban | !em | !2019"
           (foldControl "!hello | !bold | ! !ban | !em | !2019")
           ""
+    , assertEqual
+          "assertEqual foldControl !post | !hello"
+          (foldControl "!post | !hello")
+          "[POST] ..."
+    , assertEqual
+          "assertEqual foldControl !hello | !post"
+          (foldControl "!hello | !post")
+          "[POST] ..."
     ]
 
 testRelay :: [Assertion]
@@ -155,27 +163,31 @@ testRelay =
     [ assertEqual
           "assertEqual relay <no feedback loop>"
           (relay "A" 1 $ message "1" "!hello" "A" "channel")
-          Nothing
+          None
     , assertEqual
           "assertEqual relay !hello"
           (relay "A" 1 $ message "1" "!hello" "B" "channel")
-          (Just $ inject 1 "channel" "Hello!")
+          (Websocket $ inject 1 "channel" "Hello!")
     , assertEqual
           "assertEqual relay !echo ..."
           (relay "A" 1 $ message "1" "!echo foo bar baz" "B" "channel")
-          (Just $ inject 1 "channel" "foo bar baz")
+          (Websocket $ inject 1 "channel" "foo bar baz")
     , assertEqual
           "assertEqual relay !help"
           (relay "A" 1 $ message "1" "!help" "B" "channel")
-          (Just $ inject 1 "channel" options)
+          (Websocket $ inject 1 "channel" options)
     , assertEqual
           "assertEqual relay <pipe>"
           (relay "A" 1 $ message "1" "!echo foo | !rev | !upper" "B" "channel")
-          (Just $ inject 1 "channel" "OOF")
+          (Websocket $ inject 1 "channel" "OOF")
     , assertEqual
           "assertEqual relay <pipe error>"
           (relay "A" 1 $ message "1" "!echo foo | | !upper" "B" "channel")
-          Nothing
+          None
+    , assertEqual
+          "assertEqual relay !post"
+          (relay "A" 1 $ message "1" "!post" "B" "channel")
+          (POST "[POST] ...")
     ]
 
 main :: IO Counts

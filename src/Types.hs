@@ -13,3 +13,9 @@ data Message =
 
 message :: String -> String -> String -> String -> Message
 message i t u c = Message {messageId = i, text = t, user = u, channel = c}
+
+data Response
+    = Websocket String
+    | POST String
+    | None
+    deriving (Eq, Show)
