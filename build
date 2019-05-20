@@ -2,5 +2,8 @@
 
 ghc \
     src/Types.hs src/Chat.hs src/Client.hs src/Main.hs \
+    -prof \
+    -fprof-auto \
+    -rtsopts \
     -O \
     -o bin/Main
