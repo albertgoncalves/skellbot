@@ -156,6 +156,10 @@ testFoldControl =
           "assertEqual foldControl !hello | !post"
           (foldControl "!hello | !post")
           "[POST] ..."
+    , assertEqual
+          "assertEqual foldControl !hello | !2019 | !em | !ban | !echo"
+          (foldControl "!hello | !2019 | !em | !ban | !echo")
+          "_Hello! in 2019_ has been *banned*."
     ]
 
 testRelay :: [Assertion]

@@ -94,7 +94,7 @@ select "echo" = id
 select "rev" = messageCapture reverse
 select "upper" = messageCapture (map toUpper)
 select "lower" = messageCapture (map toLower)
-select "ban" = printf "%s has been *banned*."
+select "ban" = printf "%s has been *banned*." . filter (/= '.')
 select "2019" = printf "%s in 2019." . filter (/= '.')
 select "bold" = printf "*%s*" . filter (/= '*')
 select "em" = printf "_%s_" . filter (/= '_')
