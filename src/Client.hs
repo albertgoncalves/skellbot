@@ -43,7 +43,7 @@ maybeRespond connection lock botId i input =
         None -> return ()
 
 loop :: Connection -> IO ()
-loop connection = getLine >>= (\line -> unless (null line) (loop connection))
+loop connection = getLine >>= (\line -> unless (null line) $ loop connection)
 
 app :: MVar () -> String -> ClientApp ()
 app lock botId connection =
