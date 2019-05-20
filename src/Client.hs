@@ -34,10 +34,10 @@ withLock lock n f =
 maybeRespond :: Connection -> MVar () -> String -> Int -> Text -> IO ()
 maybeRespond connection lock botId i input =
     (putStrLn . printf "SlackApi> %s\n" . unpack) input >>
-    case maybe None (relay botId i) ((extract . unpack) input) of
+    case maybe None (relay botId i) (extract $ unpack input) of
         Websocket response ->
-            withLock lock 1 (sendTextData connection (pack response))
-        POST _ -> withLock lock 2 (return ()) -- awaiting implementation!
+            withLock lock 1 (sendTextData connection $ pack response)
+        POST _ -> withLock lock 2 $ return () -- awaiting implementation!
         None -> return ()
 
 loop :: Connection -> IO ()
