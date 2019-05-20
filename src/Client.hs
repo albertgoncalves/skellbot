@@ -1,5 +1,3 @@
-{-# OPTIONS_GHC -Wall #-}
-
 module Client where
 
 import Chat (extract, relay)

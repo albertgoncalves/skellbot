@@ -1,5 +1,3 @@
-{-# OPTIONS_GHC -Wall #-}
-
 module Chat where
 
 import Data.Char (isAlphaNum, toLower, toUpper)

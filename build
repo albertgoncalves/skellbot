@@ -6,4 +6,5 @@ ghc \
     -fprof-auto \
     -rtsopts \
     -O \
+    -Wall \
     -o bin/Main

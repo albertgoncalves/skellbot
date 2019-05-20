@@ -1,5 +1,3 @@
-{-# OPTIONS_GHC -Wall #-}
-
 module Types where
 
 data Message =
