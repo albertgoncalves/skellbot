@@ -3,8 +3,15 @@
 module Client where
 
 import Chat (extract, relay)
-import Control.Concurrent (forkIO, threadDelay)
-import Control.Monad (forever, unless, void)
+import Control.Concurrent
+    ( MVar
+    , forkIO
+    , newMVar
+    , putMVar
+    , takeMVar
+    , threadDelay
+    )
+import Control.Monad (forever, unless)
 import Data.Text (Text, pack, unpack)
 import Network.WebSockets
     ( ClientApp
@@ -18,27 +25,35 @@ import Types (Response(None, POST, Websocket))
 import Wuss (runSecureClient)
 
 wait :: Int -> IO ()
-wait = threadDelay . (* 1000000)
+wait n = putStrLn message >> threadDelay (n * 1000000)
+  where
+    message = printf "Client> waiting %d seconds\n" n
 
-maybeRespond :: Connection -> String -> Int -> Text -> IO ()
-maybeRespond connection botId i input =
+withLock :: MVar () -> Int -> IO () -> IO ()
+withLock lock n f =
+    takeMVar lock >>= (\release -> wait n >> f >> putMVar lock release)
+
+maybeRespond :: Connection -> MVar () -> String -> Int -> Text -> IO ()
+maybeRespond connection lock botId i input =
     (putStrLn . printf "SlackApi> %s\n" . unpack) input >>
     case maybe None (relay botId i) ((extract . unpack) input) of
-        Websocket response -> sendTextData connection (pack response)
-        POST _ -> void (wait 2) -- awaiting implementation!
+        Websocket response ->
+            withLock lock 1 (sendTextData connection (pack response))
+        POST _ -> withLock lock 2 (return ()) -- awaiting implementation!
         None -> return ()
 
 loop :: Connection -> IO ()
 loop connection = getLine >>= (\line -> unless (null line) (loop connection))
 
-app :: String -> ClientApp ()
-app botId connection =
+app :: MVar () -> String -> ClientApp ()
+app lock botId connection =
     putStrLn "\nSlackApi> ... the bursting-forth of the blossom ..." >>
     (forkIO . forever)
-        (receiveData connection >>= maybeRespond connection botId 1) >>
+        (receiveData connection >>= maybeRespond connection lock botId 1) >>
     loop connection >>
     sendClose connection (pack "Bye!") >>
     putStrLn "SlackApi> Tread softly because you tread on my dreams."
 
 run :: String -> String -> String -> IO ()
-run host path botId = runSecureClient host 443 path (app botId)
+run host path botId =
+    newMVar () >>= (\lock -> runSecureClient host 443 path $ app lock botId)
