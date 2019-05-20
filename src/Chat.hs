@@ -115,5 +115,6 @@ relay botId i m
   where
     f x
         | null x = None
+        | length x > 1000 = None
         | curlCheck x = POST x
         | otherwise = Websocket $ inject i (channel m) x
