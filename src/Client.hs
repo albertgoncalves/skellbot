@@ -25,7 +25,11 @@ import Wuss (runSecureClient)
 wait :: Int -> IO ()
 wait n = putStrLn message >> threadDelay (n * 1000000)
   where
-    message = printf "Client> waiting %d seconds\n" n
+    units =
+        case n of
+            1 -> "second"
+            _ -> "seconds"
+    message = printf "Client> waiting %d %s\n" n units
 
 withLock :: MVar () -> Int -> IO () -> IO ()
 withLock lock n f =
@@ -45,12 +49,12 @@ loop connection = getLine >>= (\line -> unless (null line) $ loop connection)
 
 app :: MVar () -> String -> ClientApp ()
 app lock botId connection =
-    putStrLn "\nSlackApi> ... the bursting-forth of the blossom ..." >>
+    putStrLn "\nClient> ... the bursting-forth of the blossom ...\n" >>
     (forkIO . forever)
         (receiveData connection >>= maybeRespond connection lock botId 1) >>
     loop connection >>
     sendClose connection (pack "Bye!") >>
-    putStrLn "SlackApi> Tread softly because you tread on my dreams."
+    putStrLn "Client> Tread softly because you tread on my dreams."
 
 run :: String -> String -> String -> IO ()
 run host path botId =
