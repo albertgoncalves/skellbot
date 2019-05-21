@@ -69,6 +69,7 @@ options =
     \`!2019 ...`\\n\
     \`!bold ...`\\n\
     \`!em ...`\\n\
+    \`!pogchomp`\\n\
     \`!help`"
 
 messageCapture :: (String -> String) -> String -> String
@@ -98,6 +99,7 @@ select "bold" = printf "*%s*" . filter (/= '*')
 select "em" = printf "_%s_" . filter (/= '_')
 select "help" = const options
 select "post" = const "[POST] ..."
+select "pogchomp" = const ":chomp: *POGCHOMP* :chomp:"
 select _ = const ""
 
 control :: String -> [String] -> String
