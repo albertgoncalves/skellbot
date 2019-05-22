@@ -35,7 +35,7 @@ testValidate :: [Assertion]
 testValidate =
     [ assertEqual "assertEqual validate !hello" (validate "!hello") ["hello"]
     , assertEqual
-          "assertEqual validate !echo foo bar baz | !rev"
+          "assertEqual validate !echo foo bar baz | !flip"
           (validate "!echo foo bar baz")
           ["echo", "foo", "bar", "baz"]
     ]
@@ -50,13 +50,13 @@ testSanitize =
 testTokenize :: [Assertion]
 testTokenize =
     [ assertEqual
-          "tokenize !hello|!rev"
-          (tokenize "!hello|!rev")
-          [["hello"], ["rev"]]
+          "tokenize !hello|!flip"
+          (tokenize "!hello|!flip")
+          [["hello"], ["flip"]]
     , assertEqual
-          "tokenize !hello | !rev"
-          (tokenize "!hello | !rev")
-          [["hello"], ["rev"]]
+          "tokenize !hello | !flip"
+          (tokenize "!hello | !flip")
+          [["hello"], ["flip"]]
     ]
 
 testControl :: [Assertion]
@@ -77,24 +77,24 @@ testFoldControl =
           (foldControl "!hello | !upper")
           "HELLO!"
     , assertEqual
-          "assertEqual foldControl !echo HELLO! | !lower | !rev"
-          (foldControl "!echo HELLO! | !lower | !rev")
+          "assertEqual foldControl !echo HELLO! | !lower | !flip"
+          (foldControl "!echo HELLO! | !lower | !flip")
           "olleh!"
     , assertEqual
-          "assertEqual foldControl !hello | !echo | !rev | !upper"
-          (foldControl "!hello | !echo | !rev | !upper")
+          "assertEqual foldControl !hello | !echo | !flip | !upper"
+          (foldControl "!hello | !echo | !flip | !upper")
           "OLLEH!"
     , assertEqual
           "assertEqual foldControl !bernar"
           (foldControl "!bernar")
           ":stache:"
     , assertEqual
-          "assertEqual foldControl !bernar | !rev"
-          (foldControl "!bernar | !rev")
+          "assertEqual foldControl !bernar | !flip"
+          (foldControl "!bernar | !flip")
           ":stache:"
     , assertEqual
-          "assertEqual foldControl !hello | rev"
-          (foldControl "!hello | rev")
+          "assertEqual foldControl !hello | flip"
+          (foldControl "!hello | flip")
           ""
     , assertEqual
           "assertEqual foldControl !hello | !echo | !echo | !echo"
@@ -105,8 +105,8 @@ testFoldControl =
           (foldControl "!echo | !echo")
           ""
     , assertEqual
-          "assertEqual foldControl !help | !upper | !rev"
-          (foldControl "!help | !upper | !rev")
+          "assertEqual foldControl !help | !upper | !flip"
+          (foldControl "!help | !upper | !flip")
           (wordByWord (map toUpper . reverse) options)
     , assertEqual
           "assertEqual foldControl !hello | !bold | !em"
@@ -125,16 +125,16 @@ testFoldControl =
           (foldControl "!echo \\n")
           ""
     , assertEqual
-          "assertEqual foldControl !echo foo bar baz!{} | !rev"
-          (foldControl "!echo foo bar baz!{} | !rev")
+          "assertEqual foldControl !echo foo bar baz!{} | !flip"
+          (foldControl "!echo foo bar baz!{} | !flip")
           ""
     , assertEqual
           "assertEqual foldControl !hello {}!hello"
           (foldControl "!hello {}!hello")
           ""
     , assertEqual
-          "assertEqual foldControl !hello | !rev | !ban | !em | !2019"
-          (foldControl "!hello | !rev | !ban | !em | !2019")
+          "assertEqual foldControl !hello | !flip | !ban | !em | !2019"
+          (foldControl "!hello | !flip | !ban | !em | !2019")
           "_olleH! has been *banned*_ in 2019."
     , assertEqual
           "assertEqual foldControl !echo ban Bernar | !em | !bold"
@@ -161,29 +161,41 @@ testFoldControl =
           (foldControl "!hello | !2019 | !em | !ban | !echo")
           "_Hello! in 2019_ has been *banned*."
     , assertEqual
-          "assertEqual foldControl !help | !rev"
-          (foldControl "!help | !rev")
+          "assertEqual foldControl !help | !flip"
+          (foldControl "!help | !flip")
           (wordByWord reverse options)
     , assertEqual
-          "assertEqual foldControl !echo bernar | !ban | !rev"
-          (foldControl "!echo bernar | !ban | !rev")
+          "assertEqual foldControl !echo bernar | !ban | !flip"
+          (foldControl "!echo bernar | !ban | !flip")
           "ranreb sah neeb *dennab*."
     , assertEqual
-          "assertEqual foldControl !echo foo bar baz | !rev"
-          (foldControl "!echo foo bar baz | !rev")
+          "assertEqual foldControl !echo foo bar baz | !flip"
+          (foldControl "!echo foo bar baz | !flip")
           "oof rab zab"
     , assertEqual
-          "assertEqual foldControl !rev foo bar baz"
-          (foldControl "!rev foo bar baz")
+          "assertEqual foldControl !flip foo bar baz"
+          (foldControl "!flip foo bar baz")
           "oof rab zab"
     , assertEqual
-          "assertEqual foldControl !bernar | !ban | !rev"
-          (foldControl "!bernar | !ban | !rev")
+          "assertEqual foldControl !bernar | !ban | !flip"
+          (foldControl "!bernar | !ban | !flip")
           ":stache: sah neeb *dennab*."
     , assertEqual
-          "assertEqual foldControl !bernar | !ban | !2019 | !rev"
-          (foldControl "!bernar | !ban | !2019 | !rev")
+          "assertEqual foldControl !bernar | !ban | !2019 | !flip"
+          (foldControl "!bernar | !ban | !2019 | !flip")
           ":stache: sah neeb *dennab* ni 2019."
+    , assertEqual
+          "assertEqual foldControl !bernar | !2019 | !bold"
+          (foldControl "!bernar | !2019 | !bold")
+          "*:stache: in 2019.*"
+    , assertEqual
+          "assertEqual foldControl !echo hmm | !em | !code"
+          (foldControl "!echo hmm | !em | !code")
+          "`hmm`"
+    , assertEqual
+          "assertEqual foldControl !echo hmm | !code | !em"
+          (foldControl "!echo hmm | !code | !em")
+          "_`hmm`_"
     ]
 
 testRelay :: [Assertion]
@@ -206,7 +218,8 @@ testRelay =
           (Websocket $ inject 1 "channel" options)
     , assertEqual
           "assertEqual relay <pipe>"
-          (relay "A" 1 $ message "1" "!echo foo | !rev | !upper" "B" "channel")
+          (relay "A" 1 $
+           message "1" "!echo foo | !flip | !upper" "B" "channel")
           (Websocket $ inject 1 "channel" "OOF")
     , assertEqual
           "assertEqual relay <pipe error>"

@@ -62,7 +62,7 @@ options =
     \`!bernar`\\n\
     \`!righton`\\n\
     \`!echo ...`\\n\
-    \`!rev ...`\\n\
+    \`!flip ...`\\n\
     \`!upper ...`\\n\
     \`!lower ...`\\n\
     \`!ban ...`\\n\
@@ -97,13 +97,14 @@ select "hello" = const "Hello!"
 select "bernar" = const ":stache:"
 select "righton" = const ":righton:x:100:"
 select "echo" = id
-select "rev" = wordByWord reverse
+select "flip" = wordByWord reverse
 select "upper" = wordByWord (map toUpper)
 select "lower" = wordByWord (map toLower)
 select "ban" = printf "%s has been *banned*." . filter (/= '.')
 select "2019" = printf "%s in 2019." . filter (/= '.')
 select "bold" = printf "*%s*" . filter (/= '*')
 select "em" = printf "_%s_" . filter (/= '_')
+select "code" = printf "`%s`" . filter (not . (`elem` "`*_"))
 select "help" = const options
 select "post" = const "[POST] ..."
 select "pogchomp" = const ":chomp: *POGCHOMP* :chomp:"
