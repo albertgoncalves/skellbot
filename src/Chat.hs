@@ -1,7 +1,7 @@
 module Chat where
 
-import Data.Char (isAlphaNum, toLower, toUpper)
-import Data.List (isInfixOf)
+import Data.Char (isAlpha, isAlphaNum, toLower, toUpper)
+import Data.List (groupBy, isInfixOf)
 import Data.Text (pack, splitOn, strip, unpack)
 import Text.Printf (printf)
 import Text.Regex (matchRegex, mkRegex)
@@ -85,14 +85,21 @@ curlCapture f x
     | curlCheck x = x
     | otherwise = f x
 
+bothAlphaNum :: Char -> Char -> Bool
+bothAlphaNum a b =
+    (isAlpha a && isAlpha b) || (a == '\\' && b == 'n') || (b == ':')
+
+wordByWord :: (String -> String) -> String -> String
+wordByWord f = concatMap (messageCapture f) . groupBy bothAlphaNum
+
 select :: String -> String -> String
 select "hello" = const "Hello!"
 select "bernar" = const ":stache:"
 select "righton" = const ":righton:x:100:"
 select "echo" = id
-select "rev" = messageCapture reverse
-select "upper" = messageCapture (map toUpper)
-select "lower" = messageCapture (map toLower)
+select "rev" = wordByWord reverse
+select "upper" = wordByWord (map toUpper)
+select "lower" = wordByWord (map toLower)
 select "ban" = printf "%s has been *banned*." . filter (/= '.')
 select "2019" = printf "%s in 2019." . filter (/= '.')
 select "bold" = printf "*%s*" . filter (/= '*')

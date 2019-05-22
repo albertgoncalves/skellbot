@@ -10,7 +10,9 @@ import Chat
     , sanitize
     , tokenize
     , validate
+    , wordByWord
     )
+import Data.Char (toUpper)
 import Test.HUnit (Counts, Test(TestCase, TestList), assertEqual, runTestTT)
 import Test.HUnit.Lang (Assertion)
 import Types (Response(None, POST, Websocket), message)
@@ -77,11 +79,11 @@ testFoldControl =
     , assertEqual
           "assertEqual foldControl !echo HELLO! | !lower | !rev"
           (foldControl "!echo HELLO! | !lower | !rev")
-          "!olleh"
+          "olleh!"
     , assertEqual
           "assertEqual foldControl !hello | !echo | !rev | !upper"
           (foldControl "!hello | !echo | !rev | !upper")
-          "!OLLEH"
+          "OLLEH!"
     , assertEqual
           "assertEqual foldControl !bernar"
           (foldControl "!bernar")
@@ -105,7 +107,7 @@ testFoldControl =
     , assertEqual
           "assertEqual foldControl !help | !upper | !rev"
           (foldControl "!help | !upper | !rev")
-          options
+          (wordByWord (map toUpper . reverse) options)
     , assertEqual
           "assertEqual foldControl !hello | !bold | !em"
           (foldControl "!hello | !bold | !em")
@@ -133,7 +135,7 @@ testFoldControl =
     , assertEqual
           "assertEqual foldControl !hello | !rev | !ban | !em | !2019"
           (foldControl "!hello | !rev | !ban | !em | !2019")
-          "_!olleH has been *banned*_ in 2019."
+          "_olleH! has been *banned*_ in 2019."
     , assertEqual
           "assertEqual foldControl !echo ban Bernar | !em | !bold"
           (foldControl "!echo ban Bernar! | !em | !bold")
@@ -158,6 +160,30 @@ testFoldControl =
           "assertEqual foldControl !hello | !2019 | !em | !ban | !echo"
           (foldControl "!hello | !2019 | !em | !ban | !echo")
           "_Hello! in 2019_ has been *banned*."
+    , assertEqual
+          "assertEqual foldControl !help | !rev"
+          (foldControl "!help | !rev")
+          (wordByWord reverse options)
+    , assertEqual
+          "assertEqual foldControl !echo bernar | !ban | !rev"
+          (foldControl "!echo bernar | !ban | !rev")
+          "ranreb sah neeb *dennab*."
+    , assertEqual
+          "assertEqual foldControl !echo foo bar baz | !rev"
+          (foldControl "!echo foo bar baz | !rev")
+          "oof rab zab"
+    , assertEqual
+          "assertEqual foldControl !rev foo bar baz"
+          (foldControl "!rev foo bar baz")
+          "oof rab zab"
+    , assertEqual
+          "assertEqual foldControl !bernar | !ban | !rev"
+          (foldControl "!bernar | !ban | !rev")
+          ":stache: sah neeb *dennab*."
+    , assertEqual
+          "assertEqual foldControl !bernar | !ban | !2019 | !rev"
+          (foldControl "!bernar | !ban | !2019 | !rev")
+          ":stache: sah neeb *dennab* ni 2019."
     ]
 
 testRelay :: [Assertion]
