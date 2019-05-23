@@ -1,10 +1,21 @@
 {-# OPTIONS_GHC -Wall #-}
 {-# LANGUAGE OverloadedStrings #-}
 
-import Control.Monad ((<=<))
-import Data.Map.Strict (Map, fromList, keys)
-import Data.Text (Text, pack, reverse, splitOn, strip, unpack, unwords, words)
-import Prelude hiding (reverse, unwords, words)
+import Control.Lens ((??))
+import Control.Monad ((<=<), foldM, join)
+import Data.Map.Strict (Map, fromList, keys, lookup)
+import Data.Text
+    ( Text
+    , null
+    , pack
+    , reverse
+    , splitOn
+    , strip
+    , unpack
+    , unwords
+    , words
+    )
+import Prelude hiding (lookup, null, reverse, unwords, words)
 import Text.Printf (printf)
 
 newtype Command =
@@ -25,22 +36,40 @@ whitelist xs@(Command (x, _))
   where
     keys' = keys commands
 
+format :: String -> Text -> Text
+format x = pack . printf x . unpack
+
 commands :: Map Text (Text -> Text)
 commands =
     fromList
-        [ ("!ban", pack . printf "%s has been banned" . unpack)
+        [ ("!ban", format "%s has been banned")
         , ("!bernar", const ":stache:")
         , ("!echo", id)
         , ("!flip", reverse)
         , ("!hello", const "Hello!")
         ]
 
-main :: IO ()
-main = mapM_ (print . mapM (whitelist <=< convert) . tokenize) xs
+combine :: Text -> Command -> Maybe Text
+combine x (Command (y, ys)) =
+    if null ys
+        then f ?? x
+        else f ?? ys
   where
+    f = lookup y commands
+
+main :: IO ()
+main = mapM_ f xs
+  where
+    f =
+        print .
+        join .
+        mapM (foldM combine "") . mapM (whitelist <=< convert) . tokenize
     xs =
-        [ "!bernar | !ban | !flip | !echo foo bar baz"
-        , "!bernar | !ban | !hello | !echo foo bar baz"
+        [ "!bernar | !ban"
+        , "!bernar | !ban | !flip"
+        , "!bernar | !ban | !flip | !echo foo bar baz"
+        , "!bernar | !ban | !flip | !echo foo bar baz | !hello"
+        , "!ban | !flip | !echo foo bar baz | !hello"
         , "!bernar | !ban | !hlelo | !echo foo bar baz"
         , "!bernar | !ban | !flip | | !echo foo bar baz"
         , "!bernar | !ban | !flip | !echo foo bar baz |"
