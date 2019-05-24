@@ -65,23 +65,3 @@ commands =
         , ("!lower", toLower)
         , ("!upper", toUpper)
         ]
-
-main :: IO ()
-main = mapM_ (putStrLn . unpack . fromMaybe "...?" . parse) xs
-  where
-    xs =
-        [ "!help"
-        , "!help | !flip | !upper"
-        , "!bernar | !ban"
-        , "!bernar | !ban | !flip"
-        , "!bernar | !ban | !flip | !upper"
-        , "!hello | !flip | !lower"
-        , "!bernar| !ban | !2019"
-        , "!bernar | !ban | !flip | !echo foo bar baz"
-        , "!bernar | !ban | !flip | !echo foo bar baz | !hello"
-        , "!echo foo bar baz | !flip"
-        , "!ban | !flip | !echo foo bar baz | !hello"
-        , "!bernar | !ban | !hlelo | !echo foo bar baz"
-        , "!bernar | !ban | !flip | | !echo foo bar baz"
-        , "!bernar | !ban | !flip | !echo foo bar baz |"
-        ]
