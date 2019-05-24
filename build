@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 ghc \
-    src/Types.hs src/Chat.hs src/Client.hs src/Main.hs \
+    src/Types.hs src/Commands.hs src/Transport.hs src/Client.hs src/Main.hs \
     -prof \
     -fprof-auto \
     -rtsopts \

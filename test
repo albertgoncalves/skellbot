@@ -6,7 +6,7 @@ if [[ $1 = "lint" ]]; then
     find . -name "*.hs" -exec bash -c 'lint "$0"' {} \;
 fi
 ghc \
-    src/Types.hs src/Chat.hs src/test/Test.hs \
+    src/Types.hs src/Commands.hs src/Transport.hs src/test/Test.hs \
     -Wall \
     -o bin/Test
 ./bin/Test

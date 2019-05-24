@@ -1,6 +1,5 @@
 module Client where
 
-import Chat (extract, relay)
 import Control.Concurrent
     ( MVar
     , forkIO
@@ -19,7 +18,8 @@ import Network.WebSockets
     , sendTextData
     )
 import Text.Printf (printf)
-import Types (Response(None, POST, Websocket))
+import Transport (extract, relay)
+import Types (Response(POST, Websocket))
 import Wuss (runSecureClient)
 
 wait :: Int -> IO ()
@@ -38,11 +38,12 @@ withLock lock n f =
 maybeRespond :: Connection -> MVar () -> String -> Int -> Text -> IO ()
 maybeRespond connection lock botId i input =
     (putStrLn . printf "SlackApi> %s\n" . unpack) input >>
-    case maybe None (relay botId i) (extract $ unpack input) of
-        Websocket response ->
+    case relay botId i =<< extract (unpack input) of
+        Just (Websocket response) ->
             withLock lock 1 (sendTextData connection $ pack response)
-        POST _ -> withLock lock 2 $ return () -- awaiting implementation!
-        None -> return ()
+        Just (POST _) ->
+            withLock lock 2 $ return () -- awaiting implementation!
+        Nothing -> return ()
 
 loop :: Connection -> IO ()
 loop connection = getLine >>= (\line -> unless (null line) $ loop connection)

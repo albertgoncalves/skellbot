@@ -1,5 +1,6 @@
-{-# OPTIONS_GHC -Wall #-}
 {-# LANGUAGE OverloadedStrings #-}
+
+module Commands where
 
 import Control.Lens ((??))
 import Control.Monad ((<=<), foldM)
@@ -21,10 +22,7 @@ import Data.Text
     )
 import Prelude hiding (lookup, null, reverse, unwords, words)
 import Text.Printf (printf)
-
-newtype Command =
-    Command (Text, Text)
-    deriving (Eq, Show)
+import Types (Command(Command))
 
 format :: String -> Text -> Text
 format x = pack . printf x . unpack
@@ -57,8 +55,8 @@ parse = foldM combine "" <=< mapM (whitelist <=< convert) . tokenize
 commands :: Map Text (Text -> Text)
 commands =
     fromList
-        [ ("!2019", format "%s in 2019")
-        , ("!ban", format "%s has been banned")
+        [ ("!2019", format "_%s_ in 2019")
+        , ("!ban", format "%s has been *banned*")
         , ("!bernar", const ":stache:")
         , ("!echo", id)
         , ("!flip", reverse)
