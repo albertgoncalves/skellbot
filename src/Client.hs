@@ -33,7 +33,7 @@ wait n = putStrLn message >> threadDelay (n * 1000000)
 
 withLock :: MVar () -> Int -> IO () -> IO ()
 withLock lock n f =
-    takeMVar lock >>= (\release -> wait n >> f >> putMVar lock release)
+    takeMVar lock >>= (\release -> f >> wait n >> putMVar lock release)
 
 maybeRespond :: Connection -> MVar () -> String -> Int -> Text -> IO ()
 maybeRespond connection lock botId i input =
