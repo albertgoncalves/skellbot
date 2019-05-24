@@ -37,24 +37,24 @@ testTokenize =
 testParse :: [Assertion]
 testParse =
     [ assertEqual
-          "parse !bernar | !ban"
-          (parse "!bernar | !ban")
-          (Just ":stache: has been *banned*")
+          "parse !echo bernar | !ban"
+          (parse "!echo bernar | !ban")
+          (Just "bernar has been *banned*")
     , assertEqual
-          "parse !bernar | !ban | !upper"
-          (parse "!bernar | !ban | !upper")
-          (Just ":STACHE: HAS BEEN *BANNED*")
+          "parse !echo bernar | !ban | !upper"
+          (parse "!echo bernar | !ban | !upper")
+          (Just "BERNAR HAS BEEN *BANNED*")
     , assertEqual
-          "parse !hello | !flip | !lower"
-          (parse "!hello | !flip | !lower")
+          "parse !echo Hello! | !flip | !lower"
+          (parse "!echo Hello! | !flip | !lower")
           (Just "!olleh")
     , assertEqual
-          "parse !bernar| !ban | !2019"
-          (parse "!bernar| !ban | !2019")
-          (Just "_:stache: has been *banned*_ in 2019")
+          "parse !echo bernar| !ban | !2019"
+          (parse "!echo bernar| !ban | !2019")
+          (Just "_bernar has been *banned*_ in 2019")
     , assertEqual
-          "parse !bernar | !ban | !flip | !echo foo bar baz"
-          (parse "!bernar | !ban | !flip | !echo foo bar baz")
+          "parse !echo bernar | !ban | !flip | !echo foo bar baz"
+          (parse "!echo bernar | !ban | !flip | !echo foo bar baz")
           Nothing
     , assertEqual
           "parse !echo foo bar baz | !flip"
@@ -72,6 +72,18 @@ testParse =
           "parse !bernar | !ban | !flip | !echo foo bar baz |"
           (parse "!bernar | !ban | !flip | !echo foo bar baz |")
           Nothing
+    , assertEqual
+          "parse !echo hello | !ban | !2019 | !flip"
+          (parse "!echo hello | !ban | !2019 | !flip")
+          (Just "9102 ni _*dennab* neeb sah olleh_")
+    , assertEqual
+          "parse !hello | !ban | !2019 | !flip | !hello"
+          (parse "!hello | !ban | !2019 | !flip | !hello")
+          Nothing
+    , assertEqual
+          "parse !echo :stache:"
+          (parse "!echo :stache:")
+          (Just ":stache:")
     ]
 
 testRelay :: [Assertion]
@@ -81,22 +93,26 @@ testRelay =
           (relay "A" 1 $ message "1" "!hello" "A" "channel")
           Nothing
     , assertEqual
-          "assertEqual relay !hello"
-          (relay "A" 1 $ message "1" "!hello" "B" "channel")
-          (Just $ Websocket $ inject 1 "channel" "Hello!")
+          "assertEqual relay !echo foo | | !upper"
+          (relay "A" 1 $ message "1" "!echo foo | | !upper" "B" "channel")
+          Nothing
     , assertEqual
-          "assertEqual relay !echo ..."
+          "assertEqual relay !echo {}"
+          (relay "A" 1 $ message "1" "!echo {}" "B" "channel")
+          Nothing
+    , assertEqual
+          "assertEqual relay !echo hello"
+          (relay "A" 1 $ message "1" "!echo hello" "B" "channel")
+          (Just $ Websocket $ inject 1 "channel" "hello")
+    , assertEqual
+          "assertEqual relay !echo foo bar baz"
           (relay "A" 1 $ message "1" "!echo foo bar baz" "B" "channel")
           (Just $ Websocket $ inject 1 "channel" "foo bar baz")
     , assertEqual
-          "assertEqual relay <pipe>"
+          "assertEqual relay !echo foo | !flip | !upper"
           (relay "A" 1 $
            message "1" "!echo foo | !flip | !upper" "B" "channel")
           (Just $ Websocket $ inject 1 "channel" "OOF")
-    , assertEqual
-          "assertEqual relay <pipe error>"
-          (relay "A" 1 $ message "1" "!echo foo | | !upper" "B" "channel")
-          Nothing
     ]
 
 main :: IO Counts

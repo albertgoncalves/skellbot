@@ -35,12 +35,15 @@ inject =
         \,\"channel\":\"%s\"\
         \,\"text\":\"%s\"}"
 
+validate :: String -> Maybe String
+validate = fmap concat . matchRegex (mkRegex "([^{};\\\"]*)")
+
 relay :: String -> Int -> Message -> Maybe Response
 relay botId i m
     | botId == messageUser m = Nothing
-    | otherwise = (f <=< parse . pack . messageText) m
+    | otherwise = (f <=< parse . pack <=< validate . messageText) m
   where
     f x
-        | length x > 1000 = Nothing
+        | length x < 1 || length x > 1000 = Nothing
         | otherwise =
             (Just . Websocket . inject i (messageChannel m) . unpack) x

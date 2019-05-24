@@ -7,7 +7,6 @@ import Control.Monad ((<=<), foldM)
 import Data.Map.Strict (Map, fromList, keys, lookup)
 import Data.Text
     ( Text
-    , intercalate
     , null
     , pack
     , reverse
@@ -56,11 +55,8 @@ commands =
     fromList
         [ ("!2019", format "_%s_ in 2019")
         , ("!ban", format "%s has been *banned*")
-        , ("!bernar", const ":stache:")
         , ("!echo", id)
         , ("!flip", reverse)
-        , ("!hello", const "Hello!")
-        , ("!help", (const . intercalate " ~ " . keys) commands)
         , ("!lower", toLower)
         , ("!upper", toUpper)
         ]
