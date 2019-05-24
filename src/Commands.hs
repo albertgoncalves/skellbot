@@ -4,6 +4,7 @@
 import Control.Lens ((??))
 import Control.Monad ((<=<), foldM)
 import Data.Map.Strict (Map, fromList, keys, lookup)
+import Data.Maybe (fromMaybe)
 import Data.Text
     ( Text
     , intercalate
@@ -68,7 +69,7 @@ commands =
         ]
 
 main :: IO ()
-main = mapM_ (print . parse) xs
+main = mapM_ (putStrLn . unpack . fromMaybe "...?" . parse) xs
   where
     xs =
         [ "!help"
