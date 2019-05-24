@@ -5,7 +5,6 @@ module Commands where
 import Control.Lens ((??))
 import Control.Monad ((<=<), foldM)
 import Data.Map.Strict (Map, fromList, keys, lookup)
-import Data.Maybe (fromMaybe)
 import Data.Text
     ( Text
     , intercalate

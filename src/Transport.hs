@@ -3,6 +3,7 @@
 module Transport where
 
 import Commands (parse)
+import Control.Monad ((<=<))
 import Data.Text (length, pack, unpack)
 import Prelude hiding (length)
 import Text.Printf (printf)
@@ -37,10 +38,9 @@ inject =
 relay :: String -> Int -> Message -> Maybe Response
 relay botId i m
     | botId == messageUser m = Nothing
-    | otherwise = (f . parse . pack . messageText) m
+    | otherwise = (f <=< parse . pack . messageText) m
   where
-    f Nothing = Nothing
-    f (Just x)
+    f x
         | length x > 1000 = Nothing
         | otherwise =
             (Just . Websocket . inject i (messageChannel m) . unpack) x
