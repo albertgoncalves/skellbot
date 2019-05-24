@@ -7,4 +7,5 @@ ghc \
     -rtsopts \
     -O \
     -Wall \
+    -fforce-recomp \
     -o bin/Main
