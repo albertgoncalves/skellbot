@@ -42,7 +42,7 @@ feed :: Int -> String -> Response -> Maybe Response
 feed i c (Websocket x)
     | length x < 1 || length x > 1000 = Nothing
     | otherwise = (Just . Websocket . pack . inject i c . unpack) x
-feed _ _ (POST _) = Nothing
+feed _ _ (POST _) = Nothing -- awaiting implementation!
 
 relay :: String -> Int -> Message -> Maybe Response
 relay botId i m
