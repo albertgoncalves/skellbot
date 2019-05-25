@@ -9,6 +9,7 @@ import Data.Text
     ( Text
     , concat
     , intercalate
+    , null
     , pack
     , reverse
     , splitOn
@@ -19,8 +20,7 @@ import Data.Text
     , unwords
     , words
     )
-import qualified Data.Text as T
-import Prelude hiding (concat, lookup, reverse, unwords, words)
+import Prelude hiding (concat, lookup, null, reverse, unwords, words)
 import Text.Printf (printf)
 import Types (Command(Call, Meta, Pipe), Response(POST, Websocket))
 
@@ -58,8 +58,8 @@ combine _ (Call y) = lookup y callCommands
 combine Nothing (Pipe (_, "")) = Nothing
 combine Nothing (Pipe (y, ys)) = lookup y pipeCommands ?? ys
 combine (Just (Websocket x)) (Pipe (y, ys))
-    | T.null ys = lookup y pipeCommands ?? x
-    | T.null x = lookup y pipeCommands ?? ys
+    | null ys = lookup y pipeCommands ?? x
+    | null x = lookup y pipeCommands ?? ys
     | otherwise = Nothing
 combine _ _ = Nothing
 
