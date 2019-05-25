@@ -7,7 +7,8 @@ import Control.Monad ((<=<), foldM)
 import Data.Map.Strict (Map, fromList, keys, lookup)
 import Data.Text
     ( Text
-    , null
+    , concat
+    , intercalate
     , pack
     , reverse
     , splitOn
@@ -18,9 +19,10 @@ import Data.Text
     , unwords
     , words
     )
-import Prelude hiding (lookup, null, reverse, unwords, words)
+import qualified Data.Text as T
+import Prelude hiding (concat, lookup, reverse, unwords, words)
 import Text.Printf (printf)
-import Types (Command(Command))
+import Types (Command(Meta, Pipe))
 
 format :: String -> Text -> Text
 format x = pack . printf x . unpack
@@ -30,28 +32,42 @@ tokenize = map (words . strip) . splitOn "|"
 
 convert :: [Text] -> Maybe Command
 convert [] = Nothing
-convert (x:xs) = (Just . Command) (x, unwords xs)
-
-whitelist :: Command -> Maybe Command
-whitelist xs@(Command (x, _))
-    | x `elem` keys' = Just xs
+convert (x:xs)
+    | x `elem` keys metaCommands = f Meta
+    | x `elem` keys pipeCommands = f Pipe
     | otherwise = Nothing
   where
-    keys' = keys commands
+    f t = (Just . t) (x, unwords xs)
 
 combine :: Text -> Command -> Maybe Text
-combine x (Command (y, ys))
-    | null ys = f ?? x
-    | null x = f ?? ys
+combine _ (Meta (y, ys)) = lookup y metaCommands ?? ys
+combine x (Pipe (y, ys))
+    | T.null ys = f ?? x
+    | T.null x = f ?? ys
     | otherwise = Nothing
   where
-    f = lookup y commands
+    f = lookup y pipeCommands
+
+filterCommands :: [Command] -> Maybe [Command]
+filterCommands xs
+    | (not . null) ys && length xs == 1 = Just ys
+    | null ys = Just xs
+    | otherwise = Nothing
+  where
+    ys = [x | x@(Meta _) <- xs]
 
 parse :: Text -> Maybe Text
-parse = foldM combine "" <=< mapM (whitelist <=< convert) . tokenize
+parse = foldM combine "" <=< filterCommands <=< mapM convert . tokenize
 
-commands :: Map Text (Text -> Text)
-commands =
+metaCommands :: Map Text (Text -> Text)
+metaCommands =
+    fromList
+        [("!help", (const . f . intercalate "`\\n`" . keys) pipeCommands)]
+  where
+    f x = concat ["`", x, "`"]
+
+pipeCommands :: Map Text (Text -> Text)
+pipeCommands =
     fromList
         [ ("!2019", format "_%s_ in 2019")
         , ("!ban", format "%s has been *banned*")
