@@ -2,7 +2,14 @@
 
 module Main where
 
-import Commands (convert, filterCommands, parse, pipeCommands, tokenize)
+import Commands
+    ( convert
+    , filterCommands
+    , metaCommands
+    , pipeCommands
+    , tokenize
+    , transform
+    )
 import Data.Map.Strict (keys)
 import Data.Text (intercalate, pack)
 import qualified Data.Text as T
@@ -44,32 +51,33 @@ testFilterCommands =
     , filterCommands [Call "!post"] @=? Just [Call "!post"]
     ]
 
-testParse :: [Assertion]
-testParse =
-    [ parse "!echo bernar | !ban" @=? f "bernar has been *banned*"
-    , parse "!echo bernar | !ban | !upper" @=? f "BERNAR HAS BEEN *BANNED*"
-    , parse "!echo Hello! | !flip | !lower" @=? f "!olleh"
-    , parse "!echo bernar| !ban | !2019" @=?
-      f "_bernar has been *banned*_ in 2019"
-    , parse "!echo bernar | !ban | !flip | !echo foo bar baz" @=? Nothing
-    , parse "!echo foo bar baz | !flip" @=? f "zab rab oof"
-    , parse "!ban | !flip | !echo foo bar baz | !echo hello" @=? Nothing
-    , parse "!bernar | !ban | !flip | | !echo foo bar baz" @=? Nothing
-    , parse "!bernar | !ban | !flip | !echo foo bar baz |" @=? Nothing
-    , parse "!echo hello | !ban | !2019 | !flip" @=?
-      f "9102 ni _*dennab* neeb sah olleh_"
-    , parse "!echo :stache:" @=? f ":stache:"
-    , parse "!help" @=?
-      (f . (\x -> T.concat ["`", x, "`"]) . intercalate "`\\n`" . keys)
-          pipeCommands
-    , parse "!help | !flip" @=? Nothing
-    , parse "!echo foo | !flip | !echo bar" @=? Nothing
-    , parse "!post" @=? (Just . POST) "sentinel"
-    , parse "!post | !echo baz" @=? Nothing
-    , parse "!ban | !echo foo | !flip" @=? Nothing
-    , parse "!echo foo | !ban | !flip" @=?
-      Just (Websocket "*dennab* neeb sah oof")
-    , parse "!echo foo | !ban | !echo bar | !flip" @=? Nothing
+testTransform :: [Assertion]
+testTransform =
+    [ transform "!echo bernar | !ban" @=? f "_bernar_ has been *banned*"
+    , transform "!echo bernar | !ban | !upper" @=?
+      f "_BERNAR_ HAS BEEN *BANNED*"
+    , transform "!echo Hello! | !flip | !lower" @=? f "!olleh"
+    , transform "!echo bernar| !ban | !2019" @=?
+      f "_bernar_ has been *banned* in 2019"
+    , transform "!echo bernar | !ban | !flip | !echo foo bar baz" @=? Nothing
+    , transform "!echo foo bar baz | !flip" @=? f "zab rab oof"
+    , transform "!ban | !flip | !echo foo bar baz | !echo hello" @=? Nothing
+    , transform "!bernar | !ban | !flip | | !echo foo bar baz" @=? Nothing
+    , transform "!bernar | !ban | !flip | !echo foo bar baz |" @=? Nothing
+    , transform "!echo hello | !ban | !2019 | !flip" @=?
+      f "9102 ni *dennab* neeb sah _olleh_"
+    , transform "!echo :stache:" @=? f ":stache:"
+    , transform "!help" @=?
+      (f . (\x -> T.concat ["`", x, "`"]) . intercalate "` `")
+          (keys pipeCommands ++ keys metaCommands)
+    , transform "!help | !flip" @=? Nothing
+    , transform "!echo foo | !flip | !echo bar" @=? Nothing
+    , transform "!post" @=? (Just . POST) "sentinel"
+    , transform "!post | !echo baz" @=? Nothing
+    , transform "!ban | !echo foo | !flip" @=? Nothing
+    , transform "!echo foo | !ban | !flip" @=?
+      Just (Websocket "*dennab* neeb sah _oof_")
+    , transform "!echo foo | !ban | !echo bar | !flip" @=? Nothing
     ]
   where
     f = Just . Websocket
@@ -97,6 +105,6 @@ main = (runTestTT . TestList . map TestCase) xs
             [ testTokenize
             , testConvert
             , testFilterCommands
-            , testParse
+            , testTransform
             , testRelay
             ]

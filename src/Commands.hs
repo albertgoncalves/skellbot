@@ -65,8 +65,9 @@ combine (Just (Websocket x)) (Pipe (y, ys))
     | otherwise = Nothing
 combine _ _ = Nothing
 
-parse :: Text -> Maybe Response
-parse = foldl combine Nothing <=< filterCommands <=< mapM convert . tokenize
+transform :: Text -> Maybe Response
+transform =
+    foldl combine Nothing <=< filterCommands <=< mapM convert . tokenize
 
 metaCommands :: Map Text Response
 metaCommands =

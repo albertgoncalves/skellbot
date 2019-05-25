@@ -2,7 +2,7 @@
 
 module Transport where
 
-import Commands (parse)
+import Commands (transform)
 import Control.Monad ((<=<))
 import Data.Text (length, pack, unpack)
 import Prelude hiding (length)
@@ -48,5 +48,6 @@ relay :: String -> Int -> Message -> Maybe Response
 relay botId i m
     | botId == messageUser m = Nothing
     | otherwise =
-        (feed i (messageChannel m) <=< parse . pack <=< validate . messageText)
+        (feed i (messageChannel m) <=<
+         transform . pack <=< validate . messageText)
             m
