@@ -86,7 +86,7 @@ main = (runTestTT . TestList . map TestCase) xs
         concat
             [ testTokenize
             , testConvert
-            , testParse
             , testFilterCommands
+            , testParse
             , testRelay
             ]
