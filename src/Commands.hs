@@ -55,13 +55,11 @@ combine :: Maybe Response -> Command -> Maybe Response
 combine _ (Meta y) = lookup y metaCommands
 combine _ (Call y) = lookup y callCommands
 combine Nothing (Pipe (_, "")) = Nothing
-combine (Just (Websocket x)) (Pipe (y, ys))
-    | T.null ys = f ?? x
-    | T.null x = f ?? ys
-    | otherwise = Nothing
-  where
-    f = lookup y pipeCommands
 combine Nothing (Pipe (y, ys)) = lookup y pipeCommands ?? ys
+combine (Just (Websocket x)) (Pipe (y, ys))
+    | T.null ys = lookup y pipeCommands ?? x
+    | T.null x = lookup y pipeCommands ?? ys
+    | otherwise = Nothing
 combine _ _ = Nothing
 
 parse :: Text -> Maybe Response
