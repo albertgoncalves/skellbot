@@ -2,8 +2,9 @@ module Types where
 
 import Data.Text (Text)
 
-newtype Command =
-    Command (Text, Text)
+data Command
+    = Pipe (Text, Text)
+    | Meta (Text, Text)
     deriving (Eq, Show)
 
 data Message =
