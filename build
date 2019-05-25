@@ -2,10 +2,5 @@
 
 ghc \
     src/Types.hs src/Commands.hs src/Transport.hs src/Client.hs src/Main.hs \
-    -prof \
-    -fprof-auto \
-    -rtsopts \
-    -O \
     -Wall \
-    -fforce-recomp \
     -o bin/Main

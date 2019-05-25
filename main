@@ -12,4 +12,4 @@ response=$(
 )
 export RTMHOST=${response%%/*}
 export RTMPATH=/${response#*/}
-rlwrap ./bin/Main +RTS -p -RTS
+rlwrap ./bin/Main
