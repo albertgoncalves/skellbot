@@ -2,11 +2,6 @@ module Types where
 
 import Data.Text (Text)
 
-data Command
-    = Pipe (Text, Text)
-    | Meta (Text, Text)
-    deriving (Eq, Show)
-
 data Message =
     Message
         { messageId :: String
@@ -21,7 +16,13 @@ message i t u c =
     Message
         {messageId = i, messageText = t, messageUser = u, messageChannel = c}
 
+data Command
+    = Pipe (Text, Text)
+    | Meta Text
+    | Call Text
+    deriving (Eq, Show)
+
 data Response
-    = Websocket String
-    | POST String
+    = Websocket Text
+    | POST Text
     deriving (Eq, Show)

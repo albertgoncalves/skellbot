@@ -10,7 +10,7 @@ import Text.Printf (printf)
 import Text.Regex (matchRegex, mkRegex)
 import Types
     ( Message(messageChannel, messageText, messageUser)
-    , Response(Websocket)
+    , Response(POST, Websocket)
     , message
     )
 
@@ -38,12 +38,15 @@ inject =
 validate :: String -> Maybe String
 validate = fmap concat . matchRegex (mkRegex "([^{};\\\"]*)")
 
+feed :: Int -> String -> Response -> Maybe Response
+feed i c (Websocket x)
+    | length x < 1 || length x > 1000 = Nothing
+    | otherwise = (Just . Websocket . pack . inject i c . unpack) x
+feed _ _ (POST _) = Nothing
+
 relay :: String -> Int -> Message -> Maybe Response
 relay botId i m
     | botId == messageUser m = Nothing
-    | otherwise = (f <=< parse . pack <=< validate . messageText) m
-  where
-    f x
-        | length x < 1 || length x > 1000 = Nothing
-        | otherwise =
-            (Just . Websocket . inject i (messageChannel m) . unpack) x
+    | otherwise =
+        (feed i (messageChannel m) <=< parse . pack <=< validate . messageText)
+            m
