@@ -43,6 +43,7 @@ convert (x:xs)
 filterCommands :: [Command] -> Maybe [Command]
 filterCommands xs@[Meta _] = Just xs
 filterCommands xs@[Call _] = Just xs
+filterCommands (Pipe (_, ""):_) = Nothing
 filterCommands xs
     | (not . any f) xs = Just xs
     | otherwise = Nothing
