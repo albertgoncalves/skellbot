@@ -47,7 +47,6 @@ feed _ _ (POST _) = Nothing -- awaiting implementation!
 relay :: String -> Int -> Message -> Maybe Response
 relay botId i m
     | botId == messageUser m = Nothing
-    | otherwise =
-        (feed i (messageChannel m) <=<
-         transform . pack <=< validate . messageText)
-            m
+    | otherwise = (feed i (messageChannel m) <=< f) m
+  where
+    f = transform . pack <=< validate . messageText
