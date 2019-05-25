@@ -66,6 +66,10 @@ testParse =
     , parse "!echo foo | !flip | !echo bar" @=? Nothing
     , parse "!post" @=? (Just . POST) "sentinel"
     , parse "!post | !echo baz" @=? Nothing
+    , parse "!ban | !echo foo | !flip" @=? Nothing
+    , parse "!echo foo | !ban | !flip" @=?
+      Just (Websocket "*dennab* neeb sah oof")
+    , parse "!echo foo | !ban | !echo bar | !flip" @=? Nothing
     ]
   where
     f = Just . Websocket
