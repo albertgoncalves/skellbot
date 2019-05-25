@@ -2,7 +2,6 @@
 
 module Commands where
 
-import Control.Lens ((??))
 import Control.Monad ((<=<))
 import Data.Map.Strict (Map, fromList, keys, lookup)
 import Data.Text
@@ -56,10 +55,10 @@ combine :: Maybe Response -> Command -> Maybe Response
 combine _ (Meta y) = lookup y metaCommands
 combine _ (Call y) = lookup y callCommands
 combine Nothing (Pipe (_, "")) = Nothing
-combine Nothing (Pipe (y, ys)) = lookup y pipeCommands ?? ys
+combine Nothing (Pipe (y, ys)) = lookup y pipeCommands <*> Just ys
 combine (Just (Websocket x)) (Pipe (y, ys))
-    | null ys = lookup y pipeCommands ?? x
-    | null x = lookup y pipeCommands ?? ys
+    | null ys = lookup y pipeCommands <*> Just x
+    | null x = lookup y pipeCommands <*> Just ys
     | otherwise = Nothing
 combine _ _ = Nothing
 
