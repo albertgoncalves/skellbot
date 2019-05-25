@@ -3,7 +3,7 @@
 module Commands where
 
 import Control.Monad ((<=<))
-import Data.Map.Strict (Map, fromList, keys, lookup)
+import Data.Map.Strict (Map, fromList, keys, lookup, member)
 import Data.Text
     ( Text
     , concat
@@ -32,12 +32,12 @@ tokenize = map (words . strip) . splitOn "|"
 convert :: [Text] -> Maybe Command
 convert [] = Nothing
 convert (x:xs)
-    | x `elem` keys metaCommands = f Meta x
-    | x `elem` keys callCommands = f Call x
-    | x `elem` keys pipeCommands = f Pipe (x, unwords xs)
+    | x `member` metaCommands = f Meta x
+    | x `member` callCommands = f Call x
+    | x `member` pipeCommands = f Pipe (x, unwords xs)
     | otherwise = Nothing
   where
-    f t = Just . t
+    f = (Just .)
 
 filterCommands :: [Command] -> Maybe [Command]
 filterCommands xs@[Meta _] = Just xs
