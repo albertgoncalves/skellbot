@@ -9,7 +9,6 @@ import Data.Text
     ( Text
     , concat
     , intercalate
-    , null
     , pack
     , reverse
     , splitOn
@@ -20,7 +19,8 @@ import Data.Text
     , unwords
     , words
     )
-import Prelude hiding (concat, lookup, null, reverse, unwords, words)
+import qualified Data.Text as T
+import Prelude hiding (concat, lookup, reverse, unwords, words)
 import Text.Printf (printf)
 import Types (Command(Meta, Pipe))
 
@@ -42,18 +42,17 @@ convert (x:xs)
 combine :: Text -> Command -> Maybe Text
 combine _ (Meta (y, ys)) = lookup y metaCommands ?? ys
 combine x (Pipe (y, ys))
-    | null ys = f ?? x
-    | null x = f ?? ys
+    | T.null ys = f ?? x
+    | T.null x = f ?? ys
     | otherwise = Nothing
   where
     f = lookup y pipeCommands
 
 filterCommands :: [Command] -> Maybe [Command]
-filterCommands xs =
-    case (xs, [x | x@(Meta _) <- xs]) of
-        ([_], [_]) -> Just xs
-        (_, []) -> Just xs
-        _ -> Nothing
+filterCommands xs@[Meta _] = Just xs
+filterCommands xs
+    | null [x | x@(Meta _) <- xs] = Just xs
+    | otherwise = Nothing
 
 parse :: Text -> Maybe Text
 parse = foldM combine "" <=< filterCommands <=< mapM convert . tokenize
