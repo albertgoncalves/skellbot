@@ -23,6 +23,9 @@ import Prelude hiding (concat, lookup, null, reverse, unwords, words)
 import Text.Printf (printf)
 import Types (Command(Call, Meta, Pipe), Response(POST, Websocket))
 
+(??) :: Functor f => f (a -> b) -> a -> f b
+f ?? x = fmap ($ x) f
+
 format :: String -> Text -> Text
 format x = pack . printf x . unpack
 
@@ -55,10 +58,10 @@ combine :: Maybe Response -> Command -> Maybe Response
 combine _ (Meta y) = lookup y metaCommands
 combine _ (Call y) = lookup y callCommands
 combine Nothing (Pipe (_, "")) = Nothing
-combine Nothing (Pipe (y, ys)) = lookup y pipeCommands <*> Just ys
+combine Nothing (Pipe (y, ys)) = lookup y pipeCommands ?? ys
 combine (Just (Websocket x)) (Pipe (y, ys))
-    | null ys = lookup y pipeCommands <*> Just x
-    | null x = lookup y pipeCommands <*> Just ys
+    | null ys = lookup y pipeCommands ?? x
+    | null x = lookup y pipeCommands ?? ys
     | otherwise = Nothing
 combine _ _ = Nothing
 
