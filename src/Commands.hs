@@ -71,10 +71,16 @@ transform =
 
 metaCommands :: Map Text Response
 metaCommands =
-    fromList
-        [("!help", (Websocket . f . intercalate "`\\n`" . keys) pipeCommands)]
+    fromList $
+    map (\(a, b) -> (a, Websocket b))
+        [ ("!help", ((\x -> concat ["`", x, "`"]) . intercalate "` `") xs)
+        , ("!example", "Try this!\\n`!echo Bernar | !ban | !2019`")
+        , ( "!sweetbot"
+          , ">_The colour of my soul is iron-grey and *sad bats* wheel about the\
+                \ steeple of my dreams._")
+        ]
   where
-    f x = concat ["`", x, "`"]
+    xs = keys pipeCommands ++ keys metaCommands
 
 callCommands :: Map Text Response
 callCommands = fromList [("!post", POST "sentinel")]
@@ -83,8 +89,8 @@ pipeCommands :: Map Text (Text -> Response)
 pipeCommands =
     fromList $
     map (\(a, b) -> (a, Websocket . b))
-        [ ("!2019", format "_%s_ in 2019")
-        , ("!ban", format "%s has been *banned*")
+        [ ("!2019", format "%s in 2019")
+        , ("!ban", format "_%s_ has been *banned*")
         , ("!echo", id)
         , ("!flip", reverse)
         , ("!lower", toLower)
