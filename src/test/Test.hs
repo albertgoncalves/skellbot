@@ -78,6 +78,11 @@ testTransform =
     , transform "!echo foo | !ban | !flip" @=?
       Just (Websocket "*dennab* neeb sah _oof_")
     , transform "!echo foo | !ban | !echo bar | !flip" @=? Nothing
+    , transform "!echo :stache: | !bday" @=?
+      Just
+          (Websocket
+               ":robot_face::birthday: Happy birthday, *:stache:*!\
+                \ :birthday::robot_face:")
     ]
   where
     f = Just . Websocket

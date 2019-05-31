@@ -76,8 +76,8 @@ metaCommands =
         [ ("!help", ((\x -> concat ["`", x, "`"]) . intercalate "` `") xs)
         , ("!example", "Try this!\\n`!echo Bernar | !ban | !2019`")
         , ( "!sweetbot"
-          , ">_The colour of my soul is iron-grey and *sad bats* wheel about the\
-                \ steeple of my dreams._")
+          , ">_The colour of my soul is iron-grey and *sad bats* wheel about\
+                \ the steeple of my dreams._")
         ]
   where
     xs = keys pipeCommands ++ keys metaCommands
@@ -91,6 +91,10 @@ pipeCommands =
     map (\(a, b) -> (a, Websocket . b))
         [ ("!2019", format "%s in 2019")
         , ("!ban", format "_%s_ has been *banned*")
+        , ( "!bday"
+          , format
+                ":robot_face::birthday: Happy birthday, *%s*!\
+            \ :birthday::robot_face:")
         , ("!echo", id)
         , ("!flip", reverse)
         , ("!lower", toLower)
