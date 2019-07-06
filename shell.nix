@@ -1,6 +1,6 @@
 { pkgs ? import <nixpkgs> {} }:
 with pkgs; mkShell {
-    name = "Websocket";
+    name = "skellbot";
     buildInputs = [
         (haskell.packages.ghc865.ghcWithPackages (pkgs: [
             pkgs.hindent
