@@ -12,6 +12,7 @@ with pkgs; mkShell {
         ]))
         jq
         rlwrap
+        shellcheck
     ];
     shellHook = ''
         . .env
