@@ -3,13 +3,20 @@
 set -e
 
 ./build
+
+export BOTID
+export RTMHOST
+export RTMPATH
 api="https://slack.com/api"
-export BOTID=$(curl "$api/auth.test?token=$SLACK_BOT_TOKEN" | jq -r ".user_id")
+
+BOTID=$(curl "$api/auth.test?token=$SLACK_BOT_TOKEN" | jq -r ".user_id")
+
 response=$(
     curl "$api/rtm.connect?token=$SLACK_BOT_TOKEN" \
         | jq -r ".url" \
         | sed "s|^wss://||"
 )
-export RTMHOST=${response%%/*}
-export RTMPATH=/${response#*/}
+RTMHOST=${response%%/*}
+RTMPATH=/${response#*/}
+
 rlwrap ./bin/Main
