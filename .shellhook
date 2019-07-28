@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-if [ $(uname -s) = "Darwin" ]; then
+if [ "$(uname -s)" = "Darwin" ]; then
     alias ls='ls --color=auto'
     alias ll='ls -l'
 fi
@@ -10,9 +10,9 @@ if [ ! -d bin/ ]; then
 fi
 
 lint() {
-    echo $1
-    hlint $1
-    hindent --indent-size 4 --sort-imports --line-length 78 $1
+    echo "$1"
+    hlint "$1"
+    hindent --indent-size 4 --sort-imports --line-length 78 "$1"
     echo ""
 }
 
