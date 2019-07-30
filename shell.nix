@@ -1,6 +1,5 @@
-{ pkgs ? import <nixpkgs> {} }:
-with pkgs; mkShell {
-    name = "skellbot";
+with import <nixpkgs> {};
+mkShell {
     buildInputs = [
         (haskell.packages.ghc865.ghcWithPackages (pkgs: [
             pkgs.hindent
